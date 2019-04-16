@@ -1,0 +1,28 @@
+---
+title: "Student Performance Dataset Analysis"
+author: "Group 14"
+date: "4/16/2019"
+output: html_document
+---
+
+```{r, include = FALSE, warning = FALSE}
+library(tidyverse)
+```
+
+```{r, warning = FALSE}
+student <- read.table("student-mat.csv", sep=";", header=T)
+student <- as_tibble(student)
+```
+
+## Expoloratory Data Analysis and Variable Filtering
+
+### Correlated Variable Filtering
+
+### Covariates of Potential Interest
+
+## Models and Model Testing
+
+## Model Selection and Interpretation
+
+## Conclusion
+
