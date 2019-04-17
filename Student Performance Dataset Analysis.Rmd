@@ -105,11 +105,77 @@ student %>%
   geom_boxplot()
 ```
 
-### Correlated Variable Filtering
+### Collinearity Analysis 
+
+VIF and Tolerance 
+
+```{r}
+covariates_int <- model.matrix(G3 ~ ., data = student )
+covariates <- covariates_int %>% as.data.frame() %>% select(-`(Intercept)`)
+student_d <- data.frame(G3 = student$G3, covariates)
+model1 <- lm(G3 ~ ., data = student_d)
+VIF = car::vif(model1)
+Tol = 1/VIF
+df = data.frame(Variable = names(VIF), VIF = VIF, Tolerance = Tol)
+df %>% arrange(desc(VIF)) %>% head(10) %>% knitr::kable(align = c("c", "c"),)
+```
+
+Displayed above are the covariates with the highest Variance Inflation Factors.
+
+EigenAnalysis for the Correlation and Scaled SSCP Matrices 
+
+```{r}
+xtx = t(covariates_int)%*%covariates_int
+Ds_half <- diag(diag(xtx)^-0.5)
+sscp <- Ds_half %*% xtx %*% Ds_half
+eig_sscp <- eigen(sscp)$values
+PCs_sscp <- prcomp(sscp)[2]
+CI_sscp <- sqrt(eig_sscp[1]/eig_sscp)
+
+cov_center <- apply(covariates, 2, function(y) y - mean(y))
+C <- (t(cov_center)%*%cov_center)/dim(cov_center)[1]
+Dc_half <- diag(diag(C)^-0.5)
+R <- Dc_half %*% C %*% Dc_half
+eig_corr <- eigen(R)$values
+CI_corr <- sqrt(eig_corr[1]/eig_corr)
+PCs_corr <- prcomp(R)[2]
+
+df <- data.frame("Eigenvalue" = c(eig_corr), "Condition Index" = c(CI_corr))
+df2 <- data.frame("Eigenvalue" = c(eig_sscp), "Condition Index" = c(CI_sscp))
+
+df %>% tail(2) %>% knitr::kable(align = c("c", "c"))
+df2 %>% filter(`Condition.Index` > 30) %>% knitr::kable(align = c("c", "c"))
+```
+
+From the Correlation Matrix, the highest Condition Index is 7.0754, which means no collinearity needs to be taken care of there. From the Scaled SSCP Matrix, there are two Condition Indices over 30.
+
+```{r}
+PCs_sscp$rotation[1:17,39:40]
+```
+
+Above shows the last 2 PC's of the Scaled SSCP Matrix for the 1st-17th covariates (the rest have values close to 0). We can see that the 8th, 15th, and 16th covariates may be collinear with the intercept. These covariates are listed below.
+
+```{r}
+names(VIF)[c(4, 8, 15, 16)]
+```
+
+** HOW TO PICK WHAT TO REMOVE ** should we just take out the intercept?
 
 ### Covariates of Potential Interest
 
 ## Models and Model Testing
+
+### Model 1: Full Model 
+
+$$y = \beta_0 + \beta_1X_1 + ... + \beta_{30}X_{30} + \epsilon$$
+
+```{r}
+summary(model1)
+```
+
+#### Diagnostics
+
+### Model 2: Stepwise Model 
 
 ## Model Selection and Interpretation
 
