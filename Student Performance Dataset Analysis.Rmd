@@ -173,9 +173,56 @@ $$y = \beta_0 + \beta_1X_1 + ... + \beta_{30}X_{30} + \epsilon$$
 summary(model1)
 ```
 
+** ADJUSTED R2 of 0.256 BOO ** 
+
 #### Diagnostics
 
-### Model 2: Stepwise Model 
+```{r}
+stud_resid = rstudent(model1)
+dat_resid <- data.frame(RESID = stud_resid, ABS = abs(stud_resid), PRED = model1$fitted.values)
+dat_resid %>% arrange(-ABS) %>% filter(ABS > 2)
+```
+
+Since this set of largest studentized residuals are all greater than 2, it may be of interest to examine them in further detail.
+
+```{r}
+nortest::ad.test(dat_resid$RESID)
+```
+
+From the code above, since the p-value 0.4184 is greater than $\alpha = 0.05$, we accept the null hypothesis that the residuals are normally distributed. 
+
+```{r, fig.height=4, fig.width=8}
+p1 <- ggplot(data = dat_resid) + geom_histogram(aes(RESID), bins = 25) + labs(x = "Studentized Residuals")
+p2 <- ggplot(data = dat_resid) + geom_point(aes(PRED, RESID)) + geom_hline(aes(yintercept = 0)) + labs(x = "Predicted Values", y = "Studentized Residuals")
+cowplot::plot_grid(p1, p2)
+```
+
+### Model 2: No Intercept
+
+```{r}
+model2 <- lm(G3 ~ . -1, data = student_d)
+summary(model2)
+```
+
+** ADJUSTED R2 OF .9421 !!!!!! ** 
+
+#### Diagnostics
+
+```{r}
+stud_resid = rstudent(model2)
+dat_resid <- data.frame(RESID = stud_resid, ABS = abs(stud_resid), PRED = model1$fitted.values)
+dat_resid %>% arrange(-ABS) %>% filter(ABS > 2)
+```
+
+```{r}
+nortest::ad.test(dat_resid$RESID)
+```
+
+```{r, fig.height=4, fig.width=8}
+p1 <- ggplot(data = dat_resid) + geom_histogram(aes(RESID), bins = 25) + labs(x = "Studentized Residuals")
+p2 <- ggplot(data = dat_resid) + geom_point(aes(PRED, RESID)) + geom_hline(aes(yintercept = 0)) + labs(x = "Predicted Values", y = "Studentized Residuals")
+cowplot::plot_grid(p1, p2)
+```
 
 ## Model Selection and Interpretation
 
