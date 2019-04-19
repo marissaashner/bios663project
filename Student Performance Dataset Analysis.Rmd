@@ -90,7 +90,19 @@ student %>% select(G1, G2, G3) %>% filter(G3 ==0 & G1 ==0 & G2 ==0)
 ```
 
 Let's remove the students with a grade of 0, as that doesn't make much practical sense, especially since all of these students have grades higher than 0 first and/or second period.
+
 **BB: agree with this approach, if we are feeling adventurous we could treat those 0's as missing and impute them but let's not over complicate things yet
+# MICE code if we decide to impute ##
+student <- read.table("student-mat.csv", sep=";", header=T)
+student <- as.data.frame(student)
+
+student$G3[student$G3 == 0] <- NA
+md.pattern(as.data.frame(student)) #38 students missing G3, almost 10% of data is missing
+imputed_data <- mice(student, m=5, maxit = 50, method = "pmm", seed = 500)
+summary(imputed_data)
+imputed_data$imp$G3
+imputed<-complete(imputed_data)
+
 
 ```{r}
 student <- student %>% filter(G3 != 0) %>% select(-G1, -G2)
