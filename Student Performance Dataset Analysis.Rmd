@@ -258,6 +258,13 @@ modelforward2 <- step(model2, direction = "forward", trace = F)
 
 Gives same exact answer if we use model1 with intercept or model2 without to do the stepwise process. Intercept is not included in the models the stepwise process gives us. 
 
+So in summary, modelback = modelboth = modelback2 = modelboth2 and modelforward = model2 (all variables with no intercept).
+
+```{r}
+summary(modelback)
+```
+
+This model so far gives us the best R2 adjusted and the most significant variables.
 
 ## Model Selection and Interpretation
 
