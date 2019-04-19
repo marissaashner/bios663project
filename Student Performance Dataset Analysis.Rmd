@@ -163,7 +163,7 @@ Above shows the last 2 PC's of the Scaled SSCP Matrix for the 1st-17th covariate
 names(VIF)[c(4, 8, 15, 16)]
 ```
 
-** HOW TO PICK WHAT TO REMOVE ** should we just take out the intercept?
+** HOW TO PICK WHAT TO REMOVE ** should we just take out the intercept? (tried in model2, looks good! )
 
 ### Covariates of Potential Interest
 
@@ -215,7 +215,66 @@ summary(model2)
 
 ```{r}
 stud_resid = rstudent(model2)
-dat_resid <- data.frame(RESID = stud_resid, ABS = abs(stud_resid), PRED = model1$fitted.values)
+dat_resid <- data.frame(RESID = stud_resid, ABS = abs(stud_resid), PRED = model2$fitted.values)
+dat_resid %>% arrange(-ABS) %>% filter(ABS > 2)
+```
+
+```{r}
+nortest::ad.test(dat_resid$RESID)
+```
+
+```{r, fig.height=4, fig.width=8}
+p1 <- ggplot(data = dat_resid) + geom_histogram(aes(RESID), bins = 25) + labs(x = "Studentized Residuals")
+p2 <- ggplot(data = dat_resid) + geom_point(aes(PRED, RESID)) + geom_hline(aes(yintercept = 0)) + labs(x = "Predicted Values", y = "Studentized Residuals")
+cowplot::plot_grid(p1, p2)
+```
+
+### Stepwise Models 
+
+```{r}
+set.seed(12345)
+modelback <- step(model1, direction = "backward", trace = F)
+modelboth <- step(model1, direction = "both", trace = F)
+modelforward <- step(model1, direction = "forward", trace = F)
+```
+
+Backward Search: 
+Variables to keep:
+School, sex, age, address, Fedu, Mjob, Fjob, traveltime, studytime, failures, schoolsup, famsup, paid, higher, internet, freetime, goout, health, absences
+
+Both Search: 
+Variables to keep:
+School, sex, age, address, Fedu, Mjob, Fjob, traveltime, studytime, failures, schoolsup, famsup, paid, higher, internet, freetime, goout, health, absences
+
+Backward and Both give the same variables.
+
+Forward Search: 
+Variables to keep:
+School, sex, age, address, famsize, Pstatus, Medu, Fedu, Mjob, Fjob, reason, guardian, traveltime, studytime, failures, schoolsup, famsup, paid, activities, nursery, higher, internet, romantic, famrel, freetime, goout, Dalc, Walc, health, absences
+
+Forward gives all the variables.
+
+```{r}
+modelback2 <- step(model2, direction = "backward", trace = F)
+modelboth2 <- step(model2, direction = "both", trace = F)
+modelforward2 <- step(model2, direction = "forward", trace = F)
+```
+
+Gives same exact answer if we use model1 with intercept or model2 without to do the stepwise process. Intercept is not included in the models the stepwise process gives us. 
+
+So in summary, modelback = modelboth = modelback2 = modelboth2 and modelforward = model2 (all variables with no intercept).
+
+```{r}
+summary(modelback)
+```
+
+This model so far gives us the best R2 adjusted and the most significant variables.
+
+#### Diagnostics
+
+```{r}
+stud_resid = rstudent(modelback)
+dat_resid <- data.frame(RESID = stud_resid, ABS = abs(stud_resid), PRED = modelback$fitted.values)
 dat_resid %>% arrange(-ABS) %>% filter(ABS > 2)
 ```
 
