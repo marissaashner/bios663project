@@ -88,13 +88,14 @@ student %>% select(G1, G2, G3) %>% filter(G3 ==0 & G1 ==0 & G2 ==0)
 ```
 
 Let's remove the students with a grade of 0, as that doesn't make much practical sense, especially since all of these students have grades higher than 0 first and/or second period.
+#BB: agree with this approach, if we are feeling adventurous we could treat those 0's as missing and impute them but let's not over complicate things yet
 
 ```{r}
 student <- student %>% filter(G3 != 0) %>% select(-G1, -G2)
 student %>% 
   ggplot(aes(G3)) + geom_histogram(bins = 20)
 ```
-
+#BB: is it odd that when we subset on G3 ne 0 we appear to lose more than just the counts at G3=0? We have ~80 people in the first histogram with a score of about 10 and only ~55 here. And we have no counts for 3 scores in the range above, but did not have these gaps initially. I'll look into this further
 
 ### Covariates and their relation to Final Grade
 
