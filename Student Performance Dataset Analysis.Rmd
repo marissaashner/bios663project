@@ -211,7 +211,7 @@ summary(model2)
 
 ```{r}
 stud_resid = rstudent(model2)
-dat_resid <- data.frame(RESID = stud_resid, ABS = abs(stud_resid), PRED = model1$fitted.values)
+dat_resid <- data.frame(RESID = stud_resid, ABS = abs(stud_resid), PRED = model2$fitted.values)
 dat_resid %>% arrange(-ABS) %>% filter(ABS > 2)
 ```
 
@@ -265,6 +265,24 @@ summary(modelback)
 ```
 
 This model so far gives us the best R2 adjusted and the most significant variables.
+
+#### Diagnostics
+
+```{r}
+stud_resid = rstudent(modelback)
+dat_resid <- data.frame(RESID = stud_resid, ABS = abs(stud_resid), PRED = modelback$fitted.values)
+dat_resid %>% arrange(-ABS) %>% filter(ABS > 2)
+```
+
+```{r}
+nortest::ad.test(dat_resid$RESID)
+```
+
+```{r, fig.height=4, fig.width=8}
+p1 <- ggplot(data = dat_resid) + geom_histogram(aes(RESID), bins = 25) + labs(x = "Studentized Residuals")
+p2 <- ggplot(data = dat_resid) + geom_point(aes(PRED, RESID)) + geom_hline(aes(yintercept = 0)) + labs(x = "Predicted Values", y = "Studentized Residuals")
+cowplot::plot_grid(p1, p2)
+```
 
 ## Model Selection and Interpretation
 
