@@ -230,9 +230,28 @@ cowplot::plot_grid(p1, p2)
 ```{r}
 set.seed(12345)
 modelback <- step(model1, direction = "backward", trace = F)
+modelback
+
 modelboth <- step(model1, direction = "both", trace = F)
+modelboth
+
 modelforward <- step(model1, direction = "forward", trace = F)
+modelforward 
 ```
+
+
+
+```{r}
+modelback2 <- step(model2, direction = "backward", trace = F)
+modelback2 
+
+modelboth2 <- step(model2, direction = "both", trace = F)
+modelboth2 
+
+modelforward2 <- step(model2, direction = "forward", trace = F)
+modelforward2
+```
+
 
 Backward Search: 
 Variables to keep:
@@ -250,18 +269,12 @@ School, sex, age, address, famsize, Pstatus, Medu, Fedu, Mjob, Fjob, reason, gua
 
 Forward gives all the variables.
 
-```{r}
-modelback2 <- step(model2, direction = "backward", trace = F)
-modelboth2 <- step(model2, direction = "both", trace = F)
-modelforward2 <- step(model2, direction = "forward", trace = F)
-```
+DOES NOT give same exact answer if we use model1 with intercept or model2 without to do the stepwise process. Intercept is not included in the second set of models the stepwise process gives us. 
 
-Gives same exact answer if we use model1 with intercept or model2 without to do the stepwise process. Intercept is not included in the models the stepwise process gives us. 
-
-So in summary, modelback = modelboth = modelback2 = modelboth2 and modelforward = model2 (all variables with no intercept).
+So in summary, modelback = modelboth = modelback2 = modelboth2 and modelforward = model2 (all variables with no intercept). ***UPDATE*** I think modelback from model1 and model2 are NOT the same... model2 is what gives the best without the intercept.
 
 ```{r}
-summary(modelback)
+summary(modelback2)
 ```
 
 This model so far gives us the best R2 adjusted and the most significant variables.

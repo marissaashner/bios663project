@@ -826,53 +826,190 @@ cowplot::plot_grid(p1, p2)</code></pre>
 <h3>Stepwise Models</h3>
 <pre class="r"><code>set.seed(12345)
 modelback &lt;- step(model1, direction = &quot;backward&quot;, trace = F)
-modelboth &lt;- step(model1, direction = &quot;both&quot;, trace = F)
-modelforward &lt;- step(model1, direction = &quot;forward&quot;, trace = F)</code></pre>
-<p>Backward Search: Variables to keep: School, sex, age, address, Fedu, Mjob, Fjob, traveltime, studytime, failures, schoolsup, famsup, paid, higher, internet, freetime, goout, health, absences</p>
-<p>Both Search: Variables to keep: School, sex, age, address, Fedu, Mjob, Fjob, traveltime, studytime, failures, schoolsup, famsup, paid, higher, internet, freetime, goout, health, absences</p>
-<p>Backward and Both give the same variables.</p>
-<p>Forward Search: Variables to keep: School, sex, age, address, famsize, Pstatus, Medu, Fedu, Mjob, Fjob, reason, guardian, traveltime, studytime, failures, schoolsup, famsup, paid, activities, nursery, higher, internet, romantic, famrel, freetime, goout, Dalc, Walc, health, absences</p>
-<p>Forward gives all the variables.</p>
-<pre class="r"><code>modelback2 &lt;- step(model2, direction = &quot;backward&quot;, trace = F)
-modelboth2 &lt;- step(model2, direction = &quot;both&quot;, trace = F)
-modelforward2 &lt;- step(model2, direction = &quot;forward&quot;, trace = F)</code></pre>
-<p>Gives same exact answer if we use model1 with intercept or model2 without to do the stepwise process. Intercept is not included in the models the stepwise process gives us.</p>
-<p>So in summary, modelback = modelboth = modelback2 = modelboth2 and modelforward = model2 (all variables with no intercept).</p>
-<pre class="r"><code>summary(modelback)</code></pre>
+modelback</code></pre>
 <pre><code>## 
 ## Call:
 ## lm(formula = G3 ~ sexM + age + Mjobhealth + Mjobservices + Fjobteacher + 
 ##     guardianother + studytime + failures + schoolsupyes + famsupyes + 
 ##     paidyes + internetyes + goout + health + absences, data = student_d)
 ## 
-## Residuals:
-##     Min      1Q  Median      3Q     Max 
-## -6.2569 -1.8742 -0.0241  1.8313  7.5670 
+## Coefficients:
+##   (Intercept)           sexM            age     Mjobhealth   Mjobservices  
+##      17.20980        0.53960       -0.26845        1.83774        1.38822  
+##   Fjobteacher  guardianother      studytime       failures   schoolsupyes  
+##       2.13670        1.01772        0.52622       -1.11806       -2.32398  
+##     famsupyes        paidyes    internetyes          goout         health  
+##      -0.57949       -0.47059        0.69284       -0.45685       -0.25360  
+##      absences  
+##      -0.05768</code></pre>
+<pre class="r"><code>modelboth &lt;- step(model1, direction = &quot;both&quot;, trace = F)
+modelboth</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = G3 ~ sexM + age + Mjobhealth + Mjobservices + Fjobteacher + 
+##     guardianother + studytime + failures + schoolsupyes + famsupyes + 
+##     paidyes + internetyes + goout + health + absences, data = student_d)
 ## 
 ## Coefficients:
-##               Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept)   17.20980    2.39381   7.189 4.15e-12 ***
-## sexM           0.53960    0.31573   1.709 0.088356 .  
-## age           -0.26845    0.13646  -1.967 0.049957 *  
-## Mjobhealth     1.83774    0.52891   3.475 0.000578 ***
-## Mjobservices   1.38822    0.34169   4.063 6.02e-05 ***
-## Fjobteacher    2.13670    0.56503   3.782 0.000184 ***
-## guardianother  1.01772    0.63949   1.591 0.112435    
-## studytime      0.52622    0.18853   2.791 0.005548 ** 
-## failures      -1.11806    0.24587  -4.547 7.55e-06 ***
-## schoolsupyes  -2.32398    0.44502  -5.222 3.08e-07 ***
-## famsupyes     -0.57949    0.32236  -1.798 0.073115 .  
-## paidyes       -0.47059    0.31100  -1.513 0.131164    
-## internetyes    0.69284    0.41114   1.685 0.092873 .  
-## goout         -0.45685    0.13720  -3.330 0.000965 ***
-## health        -0.25360    0.10570  -2.399 0.016967 *  
-## absences      -0.05768    0.01866  -3.091 0.002160 ** 
+##   (Intercept)           sexM            age     Mjobhealth   Mjobservices  
+##      17.20980        0.53960       -0.26845        1.83774        1.38822  
+##   Fjobteacher  guardianother      studytime       failures   schoolsupyes  
+##       2.13670        1.01772        0.52622       -1.11806       -2.32398  
+##     famsupyes        paidyes    internetyes          goout         health  
+##      -0.57949       -0.47059        0.69284       -0.45685       -0.25360  
+##      absences  
+##      -0.05768</code></pre>
+<pre class="r"><code>modelforward &lt;- step(model1, direction = &quot;forward&quot;, trace = F)
+modelforward </code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = G3 ~ schoolMS + sexM + age + addressU + famsizeLE3 + 
+##     PstatusT + Medu + Fedu + Mjobhealth + Mjobother + Mjobservices + 
+##     Mjobteacher + Fjobhealth + Fjobother + Fjobservices + Fjobteacher + 
+##     reasonhome + reasonother + reasonreputation + guardianmother + 
+##     guardianother + traveltime + studytime + failures + schoolsupyes + 
+##     famsupyes + paidyes + activitiesyes + nurseryyes + higheryes + 
+##     internetyes + romanticyes + famrel + freetime + goout + Dalc + 
+##     Walc + health + absences, data = student_d)
+## 
+## Coefficients:
+##      (Intercept)          schoolMS              sexM               age  
+##         15.62964          -0.60474           0.51895          -0.18688  
+##         addressU        famsizeLE3          PstatusT              Medu  
+##          0.30548           0.32023          -0.19808           0.17882  
+##             Fedu        Mjobhealth         Mjobother      Mjobservices  
+##          0.14723           1.24197          -0.45820           0.86213  
+##      Mjobteacher        Fjobhealth         Fjobother      Fjobservices  
+##         -0.68915          -0.67434          -0.70630          -0.75041  
+##      Fjobteacher        reasonhome       reasonother  reasonreputation  
+##          1.16429           0.27233          -0.14831           0.07426  
+##   guardianmother     guardianother        traveltime         studytime  
+##          0.11326           0.81685           0.06489           0.48298  
+##         failures      schoolsupyes         famsupyes           paidyes  
+##         -0.98106          -2.42149          -0.69942          -0.42560  
+##    activitiesyes        nurseryyes         higheryes       internetyes  
+##          0.12094          -0.32147           0.06856           0.60860  
+##      romanticyes            famrel          freetime             goout  
+##         -0.08457           0.11372           0.07386          -0.43928  
+##             Dalc              Walc            health          absences  
+##          0.07366          -0.15796          -0.22989          -0.06254</code></pre>
+<pre class="r"><code>modelback2 &lt;- step(model2, direction = &quot;backward&quot;, trace = F)
+modelback2 </code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = G3 ~ schoolMS + sexM + age + addressU + Fedu + Mjobhealth + 
+##     Mjobservices + Fjobteacher + traveltime + studytime + failures + 
+##     schoolsupyes + famsupyes + paidyes + higheryes + internetyes + 
+##     freetime + goout + health + absences - 1, data = student_d)
+## 
+## Coefficients:
+##     schoolMS          sexM           age      addressU          Fedu  
+##     -1.30796       0.66366       0.49941       0.74641       0.32095  
+##   Mjobhealth  Mjobservices   Fjobteacher    traveltime     studytime  
+##      1.83585       1.35465       1.57204       0.32830       0.64597  
+##     failures  schoolsupyes     famsupyes       paidyes     higheryes  
+##     -1.02636      -1.80128      -0.62688      -0.49584       1.78827  
+##  internetyes      freetime         goout        health      absences  
+##      0.75378       0.25627      -0.55995      -0.18871      -0.07025</code></pre>
+<pre class="r"><code>modelboth2 &lt;- step(model2, direction = &quot;both&quot;, trace = F)
+modelboth2 </code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = G3 ~ schoolMS + sexM + age + addressU + Fedu + Mjobhealth + 
+##     Mjobservices + Fjobteacher + traveltime + studytime + failures + 
+##     schoolsupyes + famsupyes + paidyes + higheryes + internetyes + 
+##     freetime + goout + health + absences - 1, data = student_d)
+## 
+## Coefficients:
+##     schoolMS          sexM           age      addressU          Fedu  
+##     -1.30796       0.66366       0.49941       0.74641       0.32095  
+##   Mjobhealth  Mjobservices   Fjobteacher    traveltime     studytime  
+##      1.83585       1.35465       1.57204       0.32830       0.64597  
+##     failures  schoolsupyes     famsupyes       paidyes     higheryes  
+##     -1.02636      -1.80128      -0.62688      -0.49584       1.78827  
+##  internetyes      freetime         goout        health      absences  
+##      0.75378       0.25627      -0.55995      -0.18871      -0.07025</code></pre>
+<pre class="r"><code>modelforward2 &lt;- step(model2, direction = &quot;forward&quot;, trace = F)
+modelforward2</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = G3 ~ (schoolMS + sexM + age + addressU + famsizeLE3 + 
+##     PstatusT + Medu + Fedu + Mjobhealth + Mjobother + Mjobservices + 
+##     Mjobteacher + Fjobhealth + Fjobother + Fjobservices + Fjobteacher + 
+##     reasonhome + reasonother + reasonreputation + guardianmother + 
+##     guardianother + traveltime + studytime + failures + schoolsupyes + 
+##     famsupyes + paidyes + activitiesyes + nurseryyes + higheryes + 
+##     internetyes + romanticyes + famrel + freetime + goout + Dalc + 
+##     Walc + health + absences) - 1, data = student_d)
+## 
+## Coefficients:
+##         schoolMS              sexM               age          addressU  
+##        -1.174173          0.629512          0.447759          0.648986  
+##       famsizeLE3          PstatusT              Medu              Fedu  
+##         0.361099          0.075377          0.247719          0.248913  
+##       Mjobhealth         Mjobother      Mjobservices       Mjobteacher  
+##         1.129294         -0.398583          0.792042         -0.948503  
+##       Fjobhealth         Fjobother      Fjobservices       Fjobteacher  
+##         0.368230          0.161061          0.252531          1.838260  
+##       reasonhome       reasonother  reasonreputation    guardianmother  
+##         0.440869          0.218809          0.164471          0.358059  
+##    guardianother        traveltime         studytime          failures  
+##        -0.017493          0.305324          0.573737         -0.936408  
+##     schoolsupyes         famsupyes           paidyes     activitiesyes  
+##        -1.947040         -0.621239         -0.489678          0.157649  
+##       nurseryyes         higheryes       internetyes       romanticyes  
+##        -0.176979          1.623276          0.814617         -0.261903  
+##           famrel          freetime             goout              Dalc  
+##         0.156755          0.255592         -0.523505         -0.003382  
+##             Walc            health          absences  
+##        -0.119083         -0.160164         -0.070937</code></pre>
+<p>Backward Search: Variables to keep: School, sex, age, address, Fedu, Mjob, Fjob, traveltime, studytime, failures, schoolsup, famsup, paid, higher, internet, freetime, goout, health, absences</p>
+<p>Both Search: Variables to keep: School, sex, age, address, Fedu, Mjob, Fjob, traveltime, studytime, failures, schoolsup, famsup, paid, higher, internet, freetime, goout, health, absences</p>
+<p>Backward and Both give the same variables.</p>
+<p>Forward Search: Variables to keep: School, sex, age, address, famsize, Pstatus, Medu, Fedu, Mjob, Fjob, reason, guardian, traveltime, studytime, failures, schoolsup, famsup, paid, activities, nursery, higher, internet, romantic, famrel, freetime, goout, Dalc, Walc, health, absences</p>
+<p>Forward gives all the variables.</p>
+<p>DOES NOT give same exact answer if we use model1 with intercept or model2 without to do the stepwise process. Intercept is not included in the second set of models the stepwise process gives us.</p>
+<p>So in summary, modelback = modelboth = modelback2 = modelboth2 and modelforward = model2 (all variables with no intercept). <strong><em>UPDATE</em></strong> I think modelback from model1 and model2 are NOT the same… model2 is what gives the best without the intercept.</p>
+<pre class="r"><code>summary(modelback2)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = G3 ~ schoolMS + sexM + age + addressU + Fedu + Mjobhealth + 
+##     Mjobservices + Fjobteacher + traveltime + studytime + failures + 
+##     schoolsupyes + famsupyes + paidyes + higheryes + internetyes + 
+##     freetime + goout + health + absences - 1, data = student_d)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -6.5183 -1.9252 -0.1586  1.8151  7.0478 
+## 
+## Coefficients:
+##              Estimate Std. Error t value Pr(&gt;|t|)    
+## schoolMS     -1.30796    0.53142  -2.461 0.014347 *  
+## sexM          0.66366    0.33385   1.988 0.047628 *  
+## age           0.49941    0.06985   7.149 5.45e-12 ***
+## addressU      0.74641    0.39801   1.875 0.061606 .  
+## Fedu          0.32095    0.15810   2.030 0.043143 *  
+## Mjobhealth    1.83585    0.55532   3.306 0.001049 ** 
+## Mjobservices  1.35465    0.35650   3.800 0.000172 ***
+## Fjobteacher   1.57204    0.62108   2.531 0.011823 *  
+## traveltime    0.32830    0.23552   1.394 0.164252    
+## studytime     0.64597    0.19858   3.253 0.001258 ** 
+## failures     -1.02636    0.25436  -4.035 6.76e-05 ***
+## schoolsupyes -1.80128    0.44885  -4.013 7.39e-05 ***
+## famsupyes    -0.62688    0.34221  -1.832 0.067853 .  
+## paidyes      -0.49584    0.32535  -1.524 0.128434    
+## higheryes     1.78827    0.77801   2.299 0.022144 *  
+## internetyes   0.75378    0.43309   1.740 0.082689 .  
+## freetime      0.25627    0.15975   1.604 0.109616    
+## goout        -0.55995    0.14777  -3.789 0.000179 ***
+## health       -0.18871    0.10867  -1.737 0.083367 .  
+## absences     -0.07025    0.01974  -3.558 0.000427 ***
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ## 
-## Residual standard error: 2.728 on 341 degrees of freedom
-## Multiple R-squared:  0.3158, Adjusted R-squared:  0.2857 
-## F-statistic: 10.49 on 15 and 341 DF,  p-value: &lt; 2.2e-16</code></pre>
+## Residual standard error: 2.829 on 337 degrees of freedom
+## Multiple R-squared:  0.9472, Adjusted R-squared:  0.9441 
+## F-statistic: 302.5 on 20 and 337 DF,  p-value: &lt; 2.2e-16</code></pre>
 <p>This model so far gives us the best R2 adjusted and the most significant variables.</p>
 <div id="diagnostics-2" class="section level4">
 <h4>Diagnostics</h4>
