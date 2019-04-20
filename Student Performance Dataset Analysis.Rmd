@@ -298,8 +298,8 @@ This model so far gives us the best R2 adjusted and the most significant variabl
 #### Diagnostics
 
 ```{r}
-stud_resid = rstudent(modelback)
-dat_resid <- data.frame(RESID = stud_resid, ABS = abs(stud_resid), PRED = modelback$fitted.values)
+stud_resid = rstudent(modelback2)
+dat_resid <- data.frame(RESID = stud_resid, ABS = abs(stud_resid), PRED = modelback2$fitted.values)
 dat_resid %>% arrange(-ABS) %>% filter(ABS > 2)
 ```
 
