@@ -31,6 +31,8 @@ student <- read.table("student-mat.csv", sep=";", header=T)
 student <- as_tibble(student)
 ```
 
+## Introduction 
+
 ## Data Description 
 
 The inital covariates in the dataset are:
@@ -181,10 +183,15 @@ names(VIF)[c(4, 8, 15, 16)]
 
 ## Models and Model Testing
 
+There are many types of models to consider when building a regression classifier, such as Multiple Linear Regression, ANOVA, Linear Mixed Models, and Logistic/Poisson Regression. Classically, Linear Mixed Models are used when observations are related and Logistic/Poisson Regression are used for binrary outcomes. Since we are assuming our observations (the students) are independent for our purpose, and the outcome variable (final grade) is numeric, we narrow our model search down to Multiple Linear Regression and ANOVA. Since, at least to start, we have many factor-type covariates, we begin exploring Multiple Linear Regression models and their fit to our data.
+
 ### Model 1: Full Model 
 *BB: since categorical vars are being grouped into several vars we have more than 30 Betas. I count 39 below.
 
-$$y = \beta_0 + \beta_1X_1 + ... + \beta_{30}X_{30} + \epsilon$$
+The first model we consider is a full model of all covariates possible and no interaction terms included. The model can be written as follows: 
+
+$$y = \beta_0 + \beta_1X_1 + ... + \beta_{39}X_{39} + \epsilon$$
+where $\beta_i$ represents ... and $X_i$ represents a covariate. There are more covariates than expected because each factor variable is recreated as a series of "dummy" variables. If a factor has $n$ levels, then there will be $n-1$ variables, and therefore parameters, corresponding to that covariate.
 
 ```{r}
 summary(model1)
@@ -194,19 +201,25 @@ summary(model1)
 
 #### Diagnostics
 
+In order to determine the validity of this model, we must test the assumptions of linear regression. These assumptions include homogeneity of variances and gaussian errors. 
+
 ```{r}
 stud_resid = rstudent(model1)
 dat_resid <- data.frame(RESID = stud_resid, ABS = abs(stud_resid), PRED = model1$fitted.values)
 dat_resid %>% arrange(-ABS) %>% filter(ABS > 2)
 ```
 
-Since this set of largest studentized residuals are all greater than 2, it may be of interest to examine them in further detail.
+Since this set of largest studentized residuals are all greater than 2, it may be of interest to examine them in further detail. ** this part might be better in the outlier detection section ** 
+
+###### Gaussian Errors Assumption 
 
 ```{r}
 nortest::ad.test(dat_resid$RESID)
 ```
 
 From the code above, since the p-value 0.4184 is greater than $\alpha = 0.05$, we accept the null hypothesis that the residuals are normally distributed. 
+
+###### Homogeneity of Variances (and Gaussian Errors) Assumptions
 
 ```{r, fig.height=4, fig.width=8}
 p1 <- ggplot(data = dat_resid) + geom_histogram(aes(RESID), bins = 25) + labs(x = "Studentized Residuals")
@@ -215,6 +228,8 @@ cowplot::plot_grid(p1, p2)
 ```
 
 ### Model 2: No Intercept
+
+Since, from the collinearity analysis, several variables were significantly colinear with the intercept, we next build a model identical to the full model with the removal of the intercept. 
 
 ```{r}
 model2 <- lm(G3 ~ . -1, data = student_d)
@@ -243,6 +258,8 @@ cowplot::plot_grid(p1, p2)
 
 ### Stepwise Models 
 
+** maybe only try these on model2 since it performed better originally ** 
+
 ```{r}
 set.seed(12345)
 modelback <- step(model1, direction = "backward", trace = F)
@@ -254,7 +271,6 @@ modelboth
 modelforward <- step(model1, direction = "forward", trace = F)
 modelforward 
 ```
-
 
 
 ```{r}
@@ -312,6 +328,10 @@ p1 <- ggplot(data = dat_resid) + geom_histogram(aes(RESID), bins = 25) + labs(x 
 p2 <- ggplot(data = dat_resid) + geom_point(aes(PRED, RESID)) + geom_hline(aes(yintercept = 0)) + labs(x = "Predicted Values", y = "Studentized Residuals")
 cowplot::plot_grid(p1, p2)
 ```
+
+## Outlier Detection 
+
+Leverage and Influence 
 
 ## Model Selection and Interpretation
 
