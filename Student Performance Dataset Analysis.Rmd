@@ -125,16 +125,70 @@ student %>%
 
 ```{r}
 ## visualizing absences
-# student %>% 
-#   filter(absences < 23) %>%
-#   mutate(absences = factor(absences)) %>% 
-#   ggplot(aes(absences, G3)) +
-#   geom_violin()
+student %>%
+  # filter(absences < 23) %>%
+  mutate(absences = factor(absences)) %>%
+  ggplot(aes(absences, G3)) +
+  geom_boxplot()
 
 ggplot(student, aes(absences, G3)) +
   geom_jitter() +
   geom_smooth()
+```
 
+Since the variable "absences" has a greater range of values than most of the other variables, and since after 22 absences the data becomes extremely sparse, we decided to group 23-93 absences within the value "23."
+
+```{r}
+## Pooling all absences greater than 22 into the 23 group
+student_abs_23 <- student %>% 
+  mutate(absences = case_when(
+                      absences > 22 ~ 23L,
+                      TRUE ~ .$absences))
+
+## visualizing new absences variable
+student_abs_23 %>%
+  # filter(absences < 23) %>%
+  mutate(absences = factor(absences)) %>%
+  ggplot(aes(absences, G3)) +
+  geom_boxplot()
+
+ggplot(student_abs_23, aes(absences, G3)) +
+  geom_jitter() +
+  geom_smooth()
+
+```
+
+"Absences" still has a much greater spread of values than the other variables, so we will try binning them to see how that effects our models. 
+
+```{r}
+## Binning absences into 5 groups with 5 absence numbers each (except for the last group that includes all absences greater than or equal to 20).
+
+# Binning
+student_abs_bin <- student %>% 
+  mutate(absences = case_when(
+                      absences < 5 ~ 1L, 
+                      absences >= 5 & absences < 10 ~ 2L,
+                      absences >= 10 & absences < 15 ~ 3L,
+                      absences >= 15 & absences < 20 ~ 4L,
+                      absences >= 20 ~ 5L,
+                      TRUE ~ .$absences))
+
+## visualizing new absences variable
+student_abs_bin %>%
+  # filter(absences < 23) %>%
+  mutate(absences = factor(absences)) %>%
+  ggplot(aes(absences, G3)) +
+  geom_boxplot()
+
+ggplot(student_abs_bin, aes(absences, G3)) +
+  geom_jitter() +
+  geom_smooth()
+
+```
+
+
+
+```{r}
 ## visualizing alcohol consumption
 
 # weekend alcohol consumption (5 is highest)
