@@ -140,19 +140,19 @@ Since the variable "absences" has a greater range of values than most of the oth
 
 ```{r}
 ## Pooling all absences greater than 22 into the 23 group
-student_abs_23 <- student %>% 
+student <- student %>% 
   mutate(absences = case_when(
                       absences > 22 ~ 23L,
                       TRUE ~ .$absences))
 
 ## visualizing new absences variable
-student_abs_23 %>%
+student %>%
   # filter(absences < 23) %>%
   mutate(absences = factor(absences)) %>%
   ggplot(aes(absences, G3)) +
   geom_boxplot()
 
-ggplot(student_abs_23, aes(absences, G3)) +
+ggplot(student, aes(absences, G3)) +
   geom_jitter() +
   geom_smooth()
 
@@ -164,7 +164,7 @@ ggplot(student_abs_23, aes(absences, G3)) +
 ## Binning absences into 5 groups with 5 absence numbers each (except for the last group that includes all absences greater than or equal to 20).
 
 # Binning
-student_abs_bin <- student %>% 
+student <- student %>% 
   mutate(absences = case_when(
                       absences < 5 ~ 1L, 
                       absences >= 5 & absences < 10 ~ 2L,
@@ -174,13 +174,13 @@ student_abs_bin <- student %>%
                       TRUE ~ .$absences))
 
 ## visualizing new absences variable
-student_abs_bin %>%
+student %>%
   # filter(absences < 23) %>%
   mutate(absences = factor(absences)) %>%
   ggplot(aes(absences, G3)) +
   geom_boxplot()
 
-ggplot(student_abs_bin, aes(absences, G3)) +
+ggplot(student, aes(absences, G3)) +
   geom_jitter() +
   geom_smooth()
 
