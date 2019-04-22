@@ -398,7 +398,7 @@ This model so far gives us the best R2 adjusted and the most significant variabl
 modelsmall <- lm(G3 ~ Mjobhealth + Mjobservices + Fjobteacher + failures + schoolsupyes + goout, data = student_d)
 ```
 
-#### Diagnostics
+#### Diagnostics of modelback
 
 ```{r}
 stud_resid = rstudent(modelback)
@@ -415,6 +415,28 @@ p1 <- ggplot(data = dat_resid) + geom_histogram(aes(RESID), bins = 25) + labs(x 
 p2 <- ggplot(data = dat_resid) + geom_point(aes(PRED, RESID)) + geom_hline(aes(yintercept = 0)) + labs(x = "Predicted Values", y = "Studentized Residuals")
 cowplot::plot_grid(p1, p2)
 ```
+
+### Diagnostics of modelsmall
+
+```{r}
+stud_resid_small = rstudent(modelsmall)
+dat_resid_small <- data.frame(RESID = stud_resid_small, ABS = abs(stud_resid_small), PRED = modelsmall$fitted.values)
+dat_resid_small %>% arrange(-ABS) %>% filter(ABS > 2)
+```
+
+```{r}
+nortest::ad.test(dat_resid_small$RESID)
+```
+
+Small model satisfies conditions for Gaussian assumption.
+
+```{r, fig.height=4, fig.width=8}
+p1.small <- ggplot(data = dat_resid_small) + geom_histogram(aes(RESID), bins = 25) + labs(x = "Studentized Residuals")
+p2.small <- ggplot(data = dat_resid_small) + geom_point(aes(PRED, RESID)) + geom_hline(aes(yintercept = 0)) + labs(x = "Predicted Values", y = "Studentized Residuals")
+cowplot::plot_grid(p1.small, p2.small)
+```
+
+The small model also appears to satisfy the diagnostic checks for homogeneity and linearity. Existence is trivial, but we may to discuss limitations of the independence assumption (maybe kids form study groups or grades are based on a curve)
 
 ## Extreme Residual Analysis  
 
