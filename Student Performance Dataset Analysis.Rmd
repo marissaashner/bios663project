@@ -277,19 +277,19 @@ df %>% tail(2) %>% knitr::kable(align = c("c", "c"))
 df2 %>% filter(`Condition.Index` > 30) %>% knitr::kable(align = c("c", "c"))
 ```
 
-From the Correlation Matrix, the highest Condition Index is 7.0754, which means no collinearity needs to be taken care of there. From the Scaled SSCP Matrix, there are two Condition Indices over 30.
+From the Correlation Matrix, the highest Condition Index is still very small, which means no collinearity needs to be taken care of there. From the Scaled SSCP Matrix, there are two Condition Indices over 30.
 
 ```{r}
-PCs_sscp$rotation[1:17,39:40]
+PCs_sscp$rotation[1:17,37:38]
 ```
 
-Above shows the last 2 PC's of the Scaled SSCP Matrix for the 1st-17th covariates (the rest have values close to 0). We can see that the 8th, 15th, and 16th covariates may be collinear with the intercept. These covariates are listed below.
+Above shows the last 2 PC's of the Scaled SSCP Matrix for the 1st-17th covariates (the rest have values close to 0). We can see that the 8th and 11-17th covariates may be collinear with the intercept. These covariates are listed below.
 
 ```{r}
-names(VIF)[c(4, 8, 15, 16)]
+colnames(student_d)[c(8, 11:17)]
 ```
 
-** HOW TO PICK WHAT TO REMOVE ** should we just take out the intercept? (tried in model2, looks good! )
+Many of these are factor variables that have reference values in the itnercept, so it makes sense they migh tbe collinear. Not going to remove any.
 
 ### Covariates of Potential Interest
 
@@ -341,7 +341,7 @@ cowplot::plot_grid(p1, p2)
 
 ### Model 2: No Intercept
 
-Since, from the collinearity analysis, several variables were significantly colinear with the intercept, we next build a model identical to the full model with the removal of the intercept. 
+Since, from the collinearity analysis, several variables were significantly colinear with the intercept, we next try to build a model identical to the full model with the removal of the intercept. 
 
 ```{r}
 model2 <- lm(G3 ~ . -1, data = student_d)
@@ -370,8 +370,6 @@ cowplot::plot_grid(p1, p2)
 
 ### Stepwise Models 
 
-** maybe only try these on model2 since it performed better originally ** 
-
 ```{r}
 set.seed(12345)
 modelback <- step(model1, direction = "backward", trace = F)
@@ -384,41 +382,14 @@ modelforward <- step(model1, direction = "forward", trace = F)
 modelforward 
 ```
 
-
-```{r}
-modelback2 <- step(model2, direction = "backward", trace = F)
-modelback2 
-
-modelboth2 <- step(model2, direction = "both", trace = F)
-modelboth2 
-
-modelforward2 <- step(model2, direction = "forward", trace = F)
-modelforward2
-```
-
-
-Backward Search: 
-Variables to keep:
-School, sex, age, address, Fedu, Mjob, Fjob, traveltime, studytime, failures, schoolsup, famsup, paid, higher, internet, freetime, goout, health, absences
-
-Both Search: 
-Variables to keep:
-School, sex, age, address, Fedu, Mjob, Fjob, traveltime, studytime, failures, schoolsup, famsup, paid, higher, internet, freetime, goout, health, absences
-
 Backward and Both give the same variables.
-
-Forward Search: 
-Variables to keep:
-School, sex, age, address, famsize, Pstatus, Medu, Fedu, Mjob, Fjob, reason, guardian, traveltime, studytime, failures, schoolsup, famsup, paid, activities, nursery, higher, internet, romantic, famrel, freetime, goout, Dalc, Walc, health, absences
 
 Forward gives all the variables.
 
-DOES NOT give same exact answer if we use model1 with intercept or model2 without to do the stepwise process. Intercept is not included in the second set of models the stepwise process gives us. 
-
-So in summary, modelback = modelboth = modelback2 = modelboth2 and modelforward = model2 (all variables with no intercept). ***UPDATE*** I think modelback from model1 and model2 are NOT the same... model2 is what gives the best without the intercept.
+DOES NOT give same exact answer if we use model1 with intercept or model2 without to do the stepwise process. 
 
 ```{r}
-summary(modelback2)
+summary(modelback)
 ```
 
 This model so far gives us the best R2 adjusted and the most significant variables.
@@ -426,8 +397,8 @@ This model so far gives us the best R2 adjusted and the most significant variabl
 #### Diagnostics
 
 ```{r}
-stud_resid = rstudent(modelback2)
-dat_resid <- data.frame(RESID = stud_resid, ABS = abs(stud_resid), PRED = modelback2$fitted.values)
+stud_resid = rstudent(modelback)
+dat_resid <- data.frame(RESID = stud_resid, ABS = abs(stud_resid), PRED = modelback$fitted.values)
 dat_resid %>% arrange(-ABS) %>% filter(ABS > 2)
 ```
 
@@ -450,11 +421,11 @@ Outlier -- Leverage Values
  - Values greater than 2*p/n are bad
 
 ```{r}
-p <- modelback2$coefficients %>% length()
+p <- modelback$coefficients %>% length()
 n <- nrow(student_d)
 levcutoff <- 2*p/n
-lev <- hatvalues(modelback2)
-cook <- cooks.distance(modelback2)
+lev <- hatvalues(modelback)
+cook <- cooks.distance(modelback)
 ```
 
 take out values that are outlliers and run the regression again?
@@ -465,11 +436,11 @@ Aside from looking at the Adjusted R2, can look at the AIC or SBC/BIC (smaller i
 
 ```{r}
 ## AIC Comparison
-aic <- c(AIC(model1), AIC(model2), AIC(modelback2))
-bic <- c(BIC(model1), BIC(model2), BIC(modelback2))
-adjR <- c( summary(model1)$adj.r.sq,  summary(model2)$adj.r.sq,  summary(modelback2)$adj.r.sq)
+aic <- c(AIC(model1), AIC(model2), AIC(modelback))
+bic <- c(BIC(model1), BIC(model2), BIC(modelback))
+adjR <- c( summary(model1)$adj.r.sq,  summary(model2)$adj.r.sq,  summary(modelback)$adj.r.sq)
 
-selection <- data.frame(model = c("Model1", "Model2", "Model3"), AICs = aic, BICs = bic, Adjusted.R.Squared = adjR)
+selection <- data.frame(model = c("Model1: Full Model", "Model2: No Intercept", "Model3: Stepwise Model"), AICs = aic, BICs = bic, Adjusted.R.Squared = adjR)
 selection %>% knitr::kable(align = c("c", "c"))
 ```
 
