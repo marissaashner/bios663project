@@ -164,7 +164,22 @@ student %>%
   ggplot(aes(traveltime, G3)) +
   geom_violin() +
   geom_jitter(width = 0.2, alpha = 0.5)
+
+## Guardian
+student %>% 
+  mutate(guardian = factor(guardian)) %>% 
+  ggplot(aes(guardian, G3)) +
+  geom_violin() +
+  geom_jitter(width = 0.2, alpha = 0.5)
 ```
+
+Based on these plots, we decided to remove the variable "guardian" from our dataset since it didn't seem to have any influence on the outcome. 
+
+```{r}
+student <- student %>% 
+  select(-guardian)
+```
+
 
 ### Collinearity Analysis 
 
