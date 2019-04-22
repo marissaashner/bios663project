@@ -1070,15 +1070,64 @@ cowplot::plot_grid(p1, p2)</code></pre>
 </div>
 </div>
 </div>
-<div id="outlier-detection" class="section level2">
-<h2>Outlier Detection</h2>
-<p>Leverage and Influence</p>
+<div id="extreme-residual-analysis" class="section level2">
+<h2>Extreme Residual Analysis</h2>
+<p>Influence – Cook’s Distance - Values near 1 are bad</p>
+<p>Outlier – Leverage Values - Values greater than 2*p/n are bad</p>
+<pre class="r"><code>p &lt;- modelback2$coefficients %&gt;% length()
+n &lt;- nrow(student_d)
+levcutoff &lt;- 2*p/n
+lev &lt;- hatvalues(modelback2)
+cook &lt;- cooks.distance(modelback2)</code></pre>
+<p>take out values that are outlliers and run the regression again?</p>
 </div>
 <div id="model-selection-and-interpretation" class="section level2">
 <h2>Model Selection and Interpretation</h2>
+<p>Aside from looking at the Adjusted R2, can look at the AIC or SBC/BIC (smaller is better in both cases) <strong>can add more/different models to this code, but here is the basis</strong></p>
+<pre class="r"><code>## AIC Comparison
+aic &lt;- c(AIC(model1), AIC(model2), AIC(modelback2))
+bic &lt;- c(BIC(model1), BIC(model2), BIC(modelback2))
+adjR &lt;- c( summary(model1)$adj.r.sq,  summary(model2)$adj.r.sq,  summary(modelback2)$adj.r.sq)
+
+selection &lt;- data.frame(model = c(&quot;Model1&quot;, &quot;Model2&quot;, &quot;Model3&quot;), AICs = aic, BICs = bic, Adjusted.R.Squared = adjR)
+selection %&gt;% knitr::kable(align = c(&quot;c&quot;, &quot;c&quot;))</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="center">model</th>
+<th align="center">AICs</th>
+<th align="center">BICs</th>
+<th align="center">Adjusted.R.Squared</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">Model1</td>
+<td align="center">1783.805</td>
+<td align="center">1942.792</td>
+<td align="center">0.2559761</td>
+</tr>
+<tr class="even">
+<td align="center">Model2</td>
+<td align="center">1807.152</td>
+<td align="center">1962.261</td>
+<td align="center">0.9420624</td>
+</tr>
+<tr class="odd">
+<td align="center">Model3</td>
+<td align="center">1777.075</td>
+<td align="center">1858.508</td>
+<td align="center">0.9441019</td>
+</tr>
+</tbody>
+</table>
 </div>
 <div id="conclusion" class="section level2">
 <h2>Conclusion</h2>
+</div>
+<div id="references" class="section level2">
+<h2>References</h2>
+<p>[1] <strong>Insert Dataset Reference</strong></p>
 </div>
 
 
