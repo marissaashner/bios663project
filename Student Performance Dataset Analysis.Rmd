@@ -135,7 +135,7 @@ model1 <- lm(G3 ~ ., data = student_d)
 VIF = car::vif(model1)
 Tol = 1/VIF
 df = data.frame(Variable = names(VIF), VIF = VIF, Tolerance = Tol)
-df %>% arrange(desc(VIF)) %>% head(10) %>% knitr::kable(align = c("c", "c"),)
+df %>% arrange(desc(VIF)) %>% head(10) %>% knitr::kable(align = c("c", "c"))
 ```
 
 Displayed above are the covariates with the highest Variance Inflation Factors.

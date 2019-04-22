@@ -484,7 +484,7 @@ model1 &lt;- lm(G3 ~ ., data = student_d)
 VIF = car::vif(model1)
 Tol = 1/VIF
 df = data.frame(Variable = names(VIF), VIF = VIF, Tolerance = Tol)
-df %&gt;% arrange(desc(VIF)) %&gt;% head(10) %&gt;% knitr::kable(align = c(&quot;c&quot;, &quot;c&quot;),)</code></pre>
+df %&gt;% arrange(desc(VIF)) %&gt;% head(10) %&gt;% knitr::kable(align = c(&quot;c&quot;, &quot;c&quot;))</code></pre>
 <table>
 <thead>
 <tr class="header">
