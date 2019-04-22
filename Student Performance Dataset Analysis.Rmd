@@ -123,6 +123,118 @@ student %>%
   geom_boxplot()
 ```
 
+```{r}
+## visualizing absences
+student %>%
+  # filter(absences < 23) %>%
+  mutate(absences = factor(absences)) %>%
+  ggplot(aes(absences, G3)) +
+  geom_boxplot()
+
+ggplot(student, aes(absences, G3)) +
+  geom_jitter() +
+  geom_smooth()
+```
+
+Since the variable "absences" has a greater range of values than most of the other variables, and since after 22 absences the data becomes extremely sparse, we decided to group 23-93 absences within the value "23."
+
+```{r}
+## Pooling all absences greater than 22 into the 23 group
+student <- student %>% 
+  mutate(absences = case_when(
+                      absences > 22 ~ 23L,
+                      TRUE ~ .$absences))
+
+## visualizing new absences variable
+student %>%
+  # filter(absences < 23) %>%
+  mutate(absences = factor(absences)) %>%
+  ggplot(aes(absences, G3)) +
+  geom_boxplot()
+
+ggplot(student, aes(absences, G3)) +
+  geom_jitter() +
+  geom_smooth()
+
+```
+
+"Absences" still has a much greater spread of values than the other variables, so we will try binning them to see how that effects our models. 
+
+```{r}
+## Binning absences into 5 groups with 5 absence numbers each (except for the last group that includes all absences greater than or equal to 20).
+
+# Binning
+student <- student %>% 
+  mutate(absences = case_when(
+                      absences < 5 ~ 1L, 
+                      absences >= 5 & absences < 10 ~ 2L,
+                      absences >= 10 & absences < 15 ~ 3L,
+                      absences >= 15 & absences < 20 ~ 4L,
+                      absences >= 20 ~ 5L,
+                      TRUE ~ .$absences))
+
+## visualizing new absences variable
+student %>%
+  # filter(absences < 23) %>%
+  mutate(absences = factor(absences)) %>%
+  ggplot(aes(absences, G3)) +
+  geom_boxplot()
+
+ggplot(student, aes(absences, G3)) +
+  geom_jitter() +
+  geom_smooth()
+
+```
+
+
+
+```{r}
+## visualizing alcohol consumption
+
+# weekend alcohol consumption (5 is highest)
+student %>% 
+  mutate(Walc = factor(Walc)) %>% 
+  ggplot(aes(Walc, G3)) +
+  geom_violin() +
+  geom_jitter(width = 0.2, alpha = 0.5)
+
+# workday alcohol consumption (5 is highest)
+student %>% 
+  mutate(Dalc = factor(Dalc)) %>% 
+  ggplot(aes(Dalc, G3)) +
+  geom_violin() +
+  geom_jitter(width = 0.2, alpha = 0.5)
+
+## Time spend Studying
+student %>% 
+  mutate(studytime = factor(studytime)) %>% 
+  ggplot(aes(studytime, G3)) +
+  geom_violin() +
+  geom_jitter(width = 0.2, alpha = 0.5)
+
+## Time spend travelling
+student %>% 
+  mutate(traveltime = factor(traveltime)) %>% 
+  ggplot(aes(traveltime, G3)) +
+  geom_violin() +
+  geom_jitter(width = 0.2, alpha = 0.5)
+
+## Guardian
+student %>% 
+  mutate(guardian = factor(guardian)) %>% 
+  ggplot(aes(guardian, G3)) +
+  geom_violin() +
+  geom_jitter(width = 0.2, alpha = 0.5)
+```
+
+Based on these plots, we decided to remove the variable "guardian" from our dataset since it didn't seem to have any influence on the outcome. 
+
+```{r}
+student <- student %>% 
+  select(-guardian)
+```
+
+
 ### Collinearity Analysis 
 
 VIF and Tolerance 
