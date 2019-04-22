@@ -234,6 +234,30 @@ student <- student %>%
   select(-guardian)
 ```
 
+### Initial BIC/R^2
+Just to get an initial sense of influential variables we can look at all variables up to this point and examine fit statistics. This bit of code will look at permutations of all possible models up to nvmax and then report the best model based on fit criteria. For example, with nvmax of 30 it will produce the best model for 1 covariate, 2 covariates...up to the full model. 
+```{r}
+#Based on results the best models fall within 5-20 vars, so I only considered 20 variables in this run
+best_subset <- regsubsets(G3 ~ ., student, nvmax = 20, method='exhaustive')
+results<-summary(best_subset)
+
+tibble(predictors = 1:20,
+       adj_R2 = results$adjr2,
+       Cp = results$cp,
+       BIC = results$bic) %>%
+  gather(statistic, value, -predictors) %>%
+  ggplot(aes(predictors, value, color = statistic)) +
+  geom_line(show.legend = F) +
+  geom_point(show.legend = F) +
+  facet_wrap(~ statistic, scales = "free")
+
+#which.max(results$adjr2)
+# 17 variables
+#which.min(results$bic)
+# 8 variables
+#which.min(results$cp)
+# 14 variables
+```
 
 ### Collinearity Analysis 
 
