@@ -258,6 +258,14 @@ tibble(predictors = 1:20,
 #which.min(results$cp)
 # 14 variables
 ```
+### Looking at coefficients from best subset above based on BIC
+# Notice based on BIC while the "best" option has 8 covariates, we really are not giving up much in the way of BIC using 7 covariates. We have presented both sets of coefficients here and generally want the more parsimonious model when all other criteria are the same.
+```{r}
+coef(best_subset, 8)
+coef(best_subset, 7)
+# We lose health when we drop to 7 variables. Otherwise all variables remain the same and are very similar in their effect size.
+```
+
 
 ### Collinearity Analysis 
 
