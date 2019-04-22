@@ -238,7 +238,7 @@ student <- student %>%
 Just to get an initial sense of influential variables we can look at all variables up to this point and examine fit statistics. This bit of code will look at permutations of all possible models up to nvmax and then report the best model based on fit criteria. For example, with nvmax of 30 it will produce the best model for 1 covariate, 2 covariates...up to the full model. 
 ```{r}
 #Based on results the best models fall within 5-20 vars, so I only considered 20 variables in this run
-best_subset <- regsubsets(G3 ~ ., student, nvmax = 20, method='exhaustive')
+best_subset <- leaps::regsubsets(G3 ~ ., student, nvmax = 20, method='exhaustive')
 results<-summary(best_subset)
 
 tibble(predictors = 1:20,
@@ -392,7 +392,7 @@ p2 <- ggplot(data = dat_resid) + geom_point(aes(PRED, RESID)) + geom_hline(aes(y
 cowplot::plot_grid(p1, p2)
 ```
 
-### Stepwise Models 
+### Model 3: Stepwise Model
 
 ```{r}
 set.seed(12345)
@@ -418,10 +418,6 @@ summary(modelback)
 
 This model so far gives us the best R2 adjusted and the most significant variables.
 
-```{r}
-modelsmall <- lm(G3 ~ Mjobhealth + Mjobservices + Fjobteacher + failures + schoolsupyes + goout, data = student_d)
-```
-
 #### Diagnostics of modelback
 
 ```{r}
@@ -438,6 +434,13 @@ nortest::ad.test(dat_resid$RESID)
 p1 <- ggplot(data = dat_resid) + geom_histogram(aes(RESID), bins = 25) + labs(x = "Studentized Residuals")
 p2 <- ggplot(data = dat_resid) + geom_point(aes(PRED, RESID)) + geom_hline(aes(yintercept = 0)) + labs(x = "Predicted Values", y = "Studentized Residuals")
 cowplot::plot_grid(p1, p2)
+```
+
+## Model 4: Small Stepwise 
+
+```{r}
+modelsmall <- lm(G3 ~ Mjobhealth + Mjobservices + Fjobteacher + failures + schoolsupyes + goout, data = student_d)
+summary(modelsmall)
 ```
 
 ### Diagnostics of modelsmall
@@ -461,6 +464,31 @@ cowplot::plot_grid(p1.small, p2.small)
 ```
 
 The small model also appears to satisfy the diagnostic checks for homogeneity and linearity. Existence is trivial, but we may to discuss limitations of the independence assumption (maybe kids form study groups or grades are based on a curve)
+
+## Model 5: Using RegSubsets
+
+```{r}
+model5 <- lm(G3 ~ Mjobhealth + Mjobservices + Fjobteacher + failures + schoolsupyes + goout + health + absences, data = student_d)
+summary(model5)
+```
+
+### Diagnostics of Model 5
+
+```{r}
+stud_resid = rstudent(model5)
+dat_resid <- data.frame(RESID = stud_resid, ABS = abs(stud_resid), PRED = model5$fitted.values)
+dat_resid %>% arrange(-ABS) %>% filter(ABS > 2)
+```
+
+```{r}
+nortest::ad.test(dat_resid$RESID)
+```
+
+```{r, fig.height=4, fig.width=8}
+p1 <- ggplot(data = dat_resid) + geom_histogram(aes(RESID), bins = 25) + labs(x = "Studentized Residuals")
+p2 <- ggplot(data = dat_resid) + geom_point(aes(PRED, RESID)) + geom_hline(aes(yintercept = 0)) + labs(x = "Predicted Values", y = "Studentized Residuals")
+cowplot::plot_grid(p1, p2)
+```
 
 ## Extreme Residual Analysis  
 
@@ -486,11 +514,11 @@ Aside from looking at the Adjusted R2, can look at the AIC or SBC/BIC (smaller i
 
 ```{r}
 ## AIC Comparison
-aic <- c(AIC(model1), AIC(model2), AIC(modelback), AIC(modelsmall))
-bic <- c(BIC(model1), BIC(model2), BIC(modelback), BIC(modelsmall))
-adjR <- c( summary(model1)$adj.r.sq,  summary(model2)$adj.r.sq,  summary(modelback)$adj.r.sq, summary(modelsmall)$adj.r.sq)
+aic <- c(AIC(model1), AIC(model2), AIC(modelback), AIC(modelsmall), AIC(model5))
+bic <- c(BIC(model1), BIC(model2), BIC(modelback), BIC(modelsmall), BIC(model5))
+adjR <- c( summary(model1)$adj.r.sq,  summary(model2)$adj.r.sq,  summary(modelback)$adj.r.sq, summary(modelsmall)$adj.r.sq, summary(model5)$adj.r.sq)
 
-selection <- data.frame(model = c("Model1: Full Model", "Model2: No Intercept", "Model3: Stepwise Model", "Model 4: Reduced Stepwise Model"), AICs = aic, BICs = bic, Adjusted.R.Squared = adjR)
+selection <- data.frame(model = c("Model 1: Full Model", "Model 2: No Intercept", "Model 3: Stepwise Model", "Model 4: Reduced Stepwise Model", "Model 5: Best Subset Model"), AICs = aic, BICs = bic, Adjusted.R.Squared = adjR)
 selection %>% knitr::kable(align = c("c", "c"))
 ```
 
