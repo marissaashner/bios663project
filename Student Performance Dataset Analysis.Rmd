@@ -334,7 +334,7 @@ There are many types of models to consider when building a regression classifier
 
 The first model we consider is a full model of all covariates possible and no interaction terms included. The model can be written as follows: 
 
-$$y = \beta_0 + \beta_1X_1 + ... + \beta_{39}X_{39} + \epsilon$$
+$$y = \beta_0 + \beta_1X_1 + ... + \beta_{37}X_{37} + \epsilon$$
 where $\beta_i$ represents ... and $X_i$ represents a covariate. There are more covariates than expected because each factor variable is recreated as a series of "dummy" variables. If a factor has $n$ levels, then there will be $n-1$ variables, and therefore parameters, corresponding to that covariate.
 
 ```{r}
