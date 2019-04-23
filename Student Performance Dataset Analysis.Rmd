@@ -258,6 +258,14 @@ tibble(predictors = 1:20,
 #which.min(results$cp)
 # 14 variables
 ```
+### Looking at coefficients from best subset above based on BIC
+# Notice based on BIC while the "best" option has 8 covariates, we really are not giving up much in the way of BIC using 7 covariates. We have presented both sets of coefficients here and generally want the more parsimonious model when all other criteria are the same.
+```{r}
+coef(best_subset, 8)
+coef(best_subset, 7)
+# We lose health when we drop to 7 variables. Otherwise all variables remain the same and are very similar in their effect size.
+```
+
 
 ### Collinearity Analysis 
 
@@ -326,7 +334,7 @@ There are many types of models to consider when building a regression classifier
 
 The first model we consider is a full model of all covariates possible and no interaction terms included. The model can be written as follows: 
 
-$$y = \beta_0 + \beta_1X_1 + ... + \beta_{39}X_{39} + \epsilon$$
+$$y = \beta_0 + \beta_1X_1 + ... + \beta_{37}X_{37} + \epsilon$$
 where $\beta_i$ represents ... and $X_i$ represents a covariate. There are more covariates than expected because each factor variable is recreated as a series of "dummy" variables. If a factor has $n$ levels, then there will be $n-1$ variables, and therefore parameters, corresponding to that covariate.
 
 ```{r}
@@ -436,12 +444,55 @@ p2 <- ggplot(data = dat_resid) + geom_point(aes(PRED, RESID)) + geom_hline(aes(y
 cowplot::plot_grid(p1, p2)
 ```
 
-## Model 4: Small Stepwise 
+## Model 4: Interaction Model (model.int)
+
+```{r, include = F}
+
+# looking at all possible interaction terms of variables chosen in modelback
+lm(G3 ~(schoolMS + sexM + Mjobhealth + Mjobservices + Fjobteacher + studytime + failures + 
+          schoolsupyes + famsupyes + paidyes + internetyes + goout + health + absences)^2, 
+   data = student_d) %>%
+  summary()
+```
+
+Of all possible interaction terms, several were significant. Among those, the most "interpretable" are studytime:schoolsupyes, studytime:famsupyes, studytime:goout, and schoolsupyes:goout. Interestingly, it appears that the effects of studytime are reduced when one goes out a lot; perhaps fatigue reduces the effectiveness of studying. 
+
+```{r}
+model.int <- lm(G3 ~ schoolMS + sexM + Mjobhealth + Mjobservices + Fjobteacher + studytime + 
+                  failures + schoolsupyes + famsupyes + paidyes + internetyes + goout + health +
+                  absences + studytime:schoolsupyes + studytime:famsupyes + studytime:goout + schoolsupyes:goout, 
+   data = student_d)
+```
+
+### Diagnostics of model.int
+
+```{r}
+stud_resid = rstudent(model.int)
+dat_resid <- data.frame(RESID = stud_resid, ABS = abs(stud_resid), PRED = model.int$fitted.values)
+dat_resid %>% arrange(-ABS) %>% filter(ABS > 2)
+```
+
+```{r}
+nortest::ad.test(dat_resid$RESID)
+```
+
+Normality assumption is justified for model.int
+
+```{r, fig.height=4, fig.width=8}
+p1 <- ggplot(data = dat_resid) + geom_histogram(aes(RESID), bins = 25) + labs(x = "Studentized Residuals")
+p2 <- ggplot(data = dat_resid) + geom_point(aes(PRED, RESID)) + geom_hline(aes(yintercept = 0)) + labs(x = "Predicted Values", y = "Studentized Residuals")
+cowplot::plot_grid(p1, p2)
+```
+
+## Model 5: Small Stepwise 
 
 ```{r}
 modelsmall <- lm(G3 ~ Mjobhealth + Mjobservices + Fjobteacher + failures + schoolsupyes + goout, data = student_d)
 summary(modelsmall)
 ```
+
+
+model.int satisfies linearity and homogeneity assumptions.
 
 ### Diagnostics of modelsmall
 
@@ -465,18 +516,18 @@ cowplot::plot_grid(p1.small, p2.small)
 
 The small model also appears to satisfy the diagnostic checks for homogeneity and linearity. Existence is trivial, but we may to discuss limitations of the independence assumption (maybe kids form study groups or grades are based on a curve)
 
-## Model 5: Using RegSubsets
+## Model 6: Best Subset Model
 
 ```{r}
-model5 <- lm(G3 ~ Mjobhealth + Mjobservices + Fjobteacher + failures + schoolsupyes + goout + health + absences, data = student_d)
-summary(model5)
+model6 <- lm(G3 ~ Mjobhealth + Mjobservices + Fjobteacher + failures + schoolsupyes + goout + health + absences, data = student_d)
+summary(model6)
 ```
 
-### Diagnostics of Model 5
+### Diagnostics of Model 6
 
 ```{r}
-stud_resid = rstudent(model5)
-dat_resid <- data.frame(RESID = stud_resid, ABS = abs(stud_resid), PRED = model5$fitted.values)
+stud_resid = rstudent(model6)
+dat_resid <- data.frame(RESID = stud_resid, ABS = abs(stud_resid), PRED = model6$fitted.values)
 dat_resid %>% arrange(-ABS) %>% filter(ABS > 2)
 ```
 
@@ -513,12 +564,11 @@ take out values that are outlliers and run the regression again?
 Aside from looking at the Adjusted R2, can look at the AIC or SBC/BIC (smaller is better in both cases) **can add more/different models to this code, but here is the basis**
 
 ```{r}
-## AIC Comparison
-aic <- c(AIC(model1), AIC(model2), AIC(modelback), AIC(modelsmall), AIC(model5))
-bic <- c(BIC(model1), BIC(model2), BIC(modelback), BIC(modelsmall), BIC(model5))
-adjR <- c( summary(model1)$adj.r.sq,  summary(model2)$adj.r.sq,  summary(modelback)$adj.r.sq, summary(modelsmall)$adj.r.sq, summary(model5)$adj.r.sq)
+aic <- c(AIC(model1), AIC(model2), AIC(modelback), AIC(model.int), AIC(modelsmall), AIC(model6))
+bic <- c(BIC(model1), BIC(model2), BIC(modelback), BIC(model.int), BIC(modelsmall), BIC(model6))
+adjR <- c( summary(model1)$adj.r.sq,  summary(model2)$adj.r.sq,  summary(modelback)$adj.r.sq, summary(model.int)$adj.r.sq, summary(modelsmall)$adj.r.sq, summary(model6)$adj.r.sq)
 
-selection <- data.frame(model = c("Model 1: Full Model", "Model 2: No Intercept", "Model 3: Stepwise Model", "Model 4: Reduced Stepwise Model", "Model 5: Best Subset Model"), AICs = aic, BICs = bic, Adjusted.R.Squared = adjR)
+selection <- data.frame(model = c("Model 1: Full Model", "Model 2: No Intercept", "Model 3: Stepwise Model", "Model 4: Stepwise Model + Interaction Terms", "Model 5: Reduced Stepwise Model", "Model 6: Best Subset Model"), AICs = aic, BICs = bic, Adjusted.R.Squared = adjR)
 selection %>% knitr::kable(align = c("c", "c"))
 ```
 
