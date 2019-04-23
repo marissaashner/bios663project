@@ -544,14 +544,19 @@ p2 <- ggplot(data = dat_resid) + geom_point(aes(PRED, RESID)) + geom_hline(aes(y
 cowplot::plot_grid(p1, p2)
 ```
 
-## Model 5: Small Stepwise 
+## Model 5: Reduced Stepwise Model
+
+```{r}
+lm(formula = G3 ~ sexM + Mjobhealth + Mjobservices + 
+    Fjobteacher + studytime + failures + schoolsupyes + famsupyes + 
+    goout + health + absences, data = student_d) %>% 
+  summary()
+```
 
 ```{r}
 modelsmall <- lm(G3 ~ Mjobhealth + Mjobservices + Fjobteacher + failures + schoolsupyes + goout, data = student_d)
 summary(modelsmall)
 ```
-
-model.int satisfies linearity and homogeneity assumptions.
 
 ### Diagnostics of modelsmall
 
@@ -575,7 +580,37 @@ cowplot::plot_grid(p1.small, p2.small)
 
 The small model also appears to satisfy the diagnostic checks for homogeneity and linearity. Existence is trivial, but we may to discuss limitations of the independence assumption (maybe kids form study groups or grades are based on a curve)
 
-## Model 7: Small Interaction
+## Model 6: Semi-Reduced Stepwise Model
+
+```{r}
+model6 <- lm(formula = G3 ~ sexM + Mjobhealth + Mjobservices + 
+    Fjobteacher + studytime + failures + schoolsupyes + famsupyes + 
+    goout + health + absences, data = student_d)
+summary(model6)
+```
+
+### Diagnostics of Model 6
+
+** keep this or should we not use stuff from the subset analysis?
+
+```{r}
+stud_resid = rstudent(model6)
+dat_resid <- data.frame(RESID = stud_resid, ABS = abs(stud_resid), PRED = model6$fitted.values)
+dat_resid %>% arrange(-ABS) %>% filter(ABS > 2)
+```
+
+```{r}
+nortest::ad.test(dat_resid$RESID)
+```
+
+```{r, fig.height=4, fig.width=8}
+p1 <- ggplot(data = dat_resid) + geom_histogram(aes(RESID), bins = 25) + labs(x = "Studentized Residuals")
+p2 <- ggplot(data = dat_resid) + geom_point(aes(PRED, RESID)) + geom_hline(aes(yintercept = 0)) + labs(x = "Predicted Values", y = "Studentized Residuals")
+cowplot::plot_grid(p1, p2)
+```
+
+
+## Model 7: Reduced Interaction Model
 
 ```{r}
 smallint <- lm(G3 ~ Mjobhealth + Mjobservices + Fjobteacher + studytime + failures + schoolsupyes + absences + studytime*schoolsupyes, data = student_d)
@@ -600,40 +635,12 @@ p2 <- ggplot(data = dat_resid) + geom_point(aes(PRED, RESID)) + geom_hline(aes(y
 cowplot::plot_grid(p1, p2)
 ```
 
-## Model 6: Best Subset Model
-
-```{r}
-model6 <- lm(G3 ~ Mjobhealth + Mjobservices + Fjobteacher + failures + schoolsupyes + goout + health + absences, data = student_d)
-summary(model6)
-```
-
-### Diagnostics of Model 6
-
-** keep this or should we not use stuff from the subset analysis?
-
-```{r}
-stud_resid = rstudent(model6)
-dat_resid <- data.frame(RESID = stud_resid, ABS = abs(stud_resid), PRED = model6$fitted.values)
-dat_resid %>% arrange(-ABS) %>% filter(ABS > 2)
-```
-
-```{r}
-nortest::ad.test(dat_resid$RESID)
-```
-
-```{r, fig.height=4, fig.width=8}
-p1 <- ggplot(data = dat_resid) + geom_histogram(aes(RESID), bins = 25) + labs(x = "Studentized Residuals")
-p2 <- ggplot(data = dat_resid) + geom_point(aes(PRED, RESID)) + geom_hline(aes(yintercept = 0)) + labs(x = "Predicted Values", y = "Studentized Residuals")
-cowplot::plot_grid(p1, p2)
-```
-
 ## Model 6 All Subjects: Sensitivity analysis for dropping all subjects with G3=0
 
 ```{r}
 model6_all <- lm(G3 ~ Mjobhealth + Mjobservices + Fjobteacher + failures + schoolsupyes + goout + health + absences, data = student_d_all)
 summary(model6_all)
 ```
-
 
 ## Extreme Residual Analysis  
 
@@ -672,7 +679,7 @@ aic <- c(AIC(model1), AIC(model2), AIC(modelback), AIC(model.int), AIC(modelsmal
 bic <- c(BIC(model1), BIC(model2), BIC(modelback), BIC(model.int), BIC(modelsmall), BIC(model6), BIC(smallint))
 adjR <- c( summary(model1)$adj.r.sq,  summary(model2)$adj.r.sq,  summary(modelback)$adj.r.sq, summary(model.int)$adj.r.sq, summary(modelsmall)$adj.r.sq, summary(model6)$adj.r.sq, summary(smallint)$adj.r.sq)
 
-selection <- data.frame(model = c("Model 1: Full Model", "Model 2: No Intercept", "Model 3: Stepwise Model", "Model 4: Stepwise Model + Interaction Terms", "Model 5: Reduced Stepwise Model", "Model 6: Best Subset Model", "Model 7: Reduced Interaction Model"), AICs = aic, BICs = bic, Adjusted.R.Squared = adjR)
+selection <- data.frame(model = c("Model 1: Full Model", "Model 2: No Intercept", "Model 3: Stepwise Model", "Model 4: Stepwise Model + Interaction Terms", "Model 5: Reduced Stepwise Model", "Model 6: Semi-Reduced Stepwise Model", "Model 7: Reduced Interaction Model"), AICs = aic, BICs = bic, Adjusted.R.Squared = adjR)
 selection %>% knitr::kable(align = c("c", "c"))
 ```
 
@@ -680,5 +687,5 @@ selection %>% knitr::kable(align = c("c", "c"))
 
 ## References 
 
-[1] **Insert Dataset Reference** 
+[1] P. Cortez and A. Silva. Using Data Mining to Predict Secondary School Student Performance. In A. Brito and J. Teixeira Eds., Proceedings of 5th Future Business Technology Conference (FUBUTEC 2008) pp. 5-12, Porto, Portugal, April, 2008, EUROSIS, ISBN 978-9077381-39-7.
 
