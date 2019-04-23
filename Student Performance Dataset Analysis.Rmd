@@ -257,12 +257,16 @@ student %>%
 
 Based on these plots, we decided to remove the variable "guardian" from our dataset since it didn't seem to have any influence on the outcome. 
 
+We also observed that students in this dataset were from two different schools. Using school in our prediction of math course success, although it may increase prediction accuracy, would make our analysis less generalizable to the overall population of students. Since the overarching goal of this analysis is to identify factors that systematically affect secondary school student success in math courses, we decided to remove school as a predictor variable.
+
 ```{r}
 student <- student %>% 
-  select(-guardian)
+  select(-guardian) %>%
+  select(-school)
 
 student_all <- student_all %>% 
-  select(-guardian)
+  select(-guardian) %>%
+  select(-school)
 ```
 
 ### Initial BIC/R^2
@@ -349,7 +353,7 @@ df2 %>% filter(`Condition.Index` > 30) %>% knitr::kable(align = c("c", "c"))
 From the Correlation Matrix, the highest Condition Index is still very small, which means no collinearity needs to be taken care of there. From the Scaled SSCP Matrix, there are two Condition Indices over 30.
 
 ```{r}
-PCs_sscp$rotation[1:17,37:38]
+PCs_sscp$rotation[1:17,36:37]
 ```
 
 Above shows the last 2 PC's of the Scaled SSCP Matrix for the 1st-17th covariates (the rest have values close to 0). We can see that the 8th and 11-17th covariates may be collinear with the intercept. These covariates are listed below.
@@ -486,7 +490,7 @@ cowplot::plot_grid(p1, p2)
 ```{r, include = F}
 
 # looking at all possible interaction terms of variables chosen in modelback
-lm(G3 ~(schoolMS + sexM + Mjobhealth + Mjobservices + Fjobteacher + studytime + failures + 
+lm(G3 ~(sexM + Mjobhealth + Mjobservices + Fjobteacher + studytime + failures + 
           schoolsupyes + famsupyes + paidyes + internetyes + goout + health + absences)^2, 
    data = student_d) %>%
   summary()
@@ -495,7 +499,7 @@ lm(G3 ~(schoolMS + sexM + Mjobhealth + Mjobservices + Fjobteacher + studytime + 
 Of all possible interaction terms, several were significant. Among those, the most "interpretable" are studytime:schoolsupyes, studytime:famsupyes, studytime:goout, and schoolsupyes:goout. Interestingly, it appears that the effects of studytime are reduced when one goes out a lot; perhaps fatigue reduces the effectiveness of studying. 
 
 ```{r}
-model.int <- lm(G3 ~ schoolMS + sexM + Mjobhealth + Mjobservices + Fjobteacher + studytime + 
+model.int <- lm(G3 ~ sexM + Mjobhealth + Mjobservices + Fjobteacher + studytime + 
                   failures + schoolsupyes + famsupyes + paidyes + internetyes + goout + health +
                   absences + studytime:schoolsupyes + studytime:famsupyes + studytime:goout + schoolsupyes:goout, 
    data = student_d)
