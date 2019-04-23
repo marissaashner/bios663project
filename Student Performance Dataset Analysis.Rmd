@@ -119,6 +119,7 @@ ggcorr(student)
 
 ```{r}
 student <- student %>% filter(G3 != 0) %>% select(-G1, -G2)
+student_all <- student_all %>% select(-G1, -G2)
 student %>% 
   ggplot(aes(G3)) + geom_histogram(binwidth = 1, color='black', fill = 'grey') + 
   geom_vline(xintercept = mean(student$G3), lwd = 1, color = 'red') +
@@ -191,6 +192,15 @@ student <- student %>%
                       absences >= 20 ~ 5L,
                       TRUE ~ .$absences))
 
+student_all <- student_all %>% 
+  mutate(absences = case_when(
+                      absences < 5 ~ 1L, 
+                      absences >= 5 & absences < 10 ~ 2L,
+                      absences >= 10 & absences < 15 ~ 3L,
+                      absences >= 15 & absences < 20 ~ 4L,
+                      absences >= 20 ~ 5L,
+                      TRUE ~ .$absences))
+
 ## visualizing new absences variable
 student %>%
   # filter(absences < 23) %>%
@@ -250,6 +260,9 @@ Based on these plots, we decided to remove the variable "guardian" from our data
 ```{r}
 student <- student %>% 
   select(-guardian)
+
+student_all <- student_all %>% 
+  select(-guardian)
 ```
 
 ### Initial BIC/R^2
@@ -298,6 +311,12 @@ VIF = car::vif(model1)
 Tol = 1/VIF
 df = data.frame(Variable = names(VIF), VIF = VIF, Tolerance = Tol)
 df %>% arrange(desc(VIF)) %>% head(10) %>% knitr::kable(align = c("c", "c"))
+
+
+#set up dataframe for all students dataset:
+covariates_int_all <- model.matrix(G3 ~ ., data = student_all )
+covariates_all <- covariates_int_all %>% as.data.frame() %>% select(-`(Intercept)`)
+student_d_all <- data.frame(G3 = student_all$G3, covariates_all)
 ```
 
 Displayed above are the covariates with the highest Variance Inflation Factors.
@@ -558,6 +577,14 @@ p1 <- ggplot(data = dat_resid) + geom_histogram(aes(RESID), bins = 25) + labs(x 
 p2 <- ggplot(data = dat_resid) + geom_point(aes(PRED, RESID)) + geom_hline(aes(yintercept = 0)) + labs(x = "Predicted Values", y = "Studentized Residuals")
 cowplot::plot_grid(p1, p2)
 ```
+
+## Model 6 All Subjects: Sensitivity analysis for dropping all subjects with G3=0
+
+```{r}
+model6_all <- lm(G3 ~ Mjobhealth + Mjobservices + Fjobteacher + failures + schoolsupyes + goout + health + absences, data = student_d_all)
+summary(model6_all)
+```
+
 
 ## Extreme Residual Analysis  
 
