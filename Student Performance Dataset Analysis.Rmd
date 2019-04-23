@@ -54,7 +54,6 @@ The potential outcomes of this analysis are:
 1. Identification of student behaviors that can be targeted through school-related programs or interventions in order to increase success
 1. Indentification of inherent factors present in certain students' backgrounds that may put them at a disadvantage to begin with. Early identification without discrimination could result in these students being helped more effectively along the way.
 
-
 ## Data Description 
 
 The inital covariates in the dataset are:
