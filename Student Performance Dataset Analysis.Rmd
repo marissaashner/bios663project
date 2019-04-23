@@ -635,6 +635,16 @@ cook <- cooks.distance(modelback)
 
 take out values that are outlliers and run the regression again?
 
+We decide to further remove a few outliers informally to increase the accuracy of our analysis. For example, we noticed that there were five students in the 20-22 age range. Since ages 15-18 had 70+ students per age, and age 19 had 19 students, we decided to remove the 20-22 year old students. For students of this age to be in secondary school, it is likely that they had certain extenuating circumstances that may not be represented in the dataset. Moreover, we simply have too few observations in this age range to be able to accurately analyze the effects of age on outcome in the 20+ region. Therefore, we went ahead and removed these students.
+
+```{r}
+table(student$age)
+
+student <- student %>%
+  filter(age < 20)
+```
+
+
 ## Model Selection and Interpretation
 
 Aside from looking at the Adjusted R2, can look at the AIC or SBC/BIC (smaller is better in both cases) **can add more/different models to this code, but here is the basis**
