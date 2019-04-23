@@ -24,11 +24,16 @@ pre { /* Code block - determines code spacing between lines */
 ```{r, include = FALSE, warning = FALSE}
 knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 library(tidyverse)
+library(ggplot2)
+library(GGally)
 ```
 
 ```{r, warning = FALSE}
 student <- read.table("student-mat.csv", sep=";", header=T)
 student <- as_tibble(student)
+
+student_all <- read.table("student-mat.csv", sep=";", header=T)
+student_all <- as_tibble(student)
 ```
 
 ## Introduction 
@@ -106,6 +111,12 @@ imputed_data$imp$G3
 imputed<-complete(imputed_data)
 
 
+### Correlation for all continuous variables
+```{r}
+#Note this throws a warning about variables being non-numeric but still produces output for all numeric arguments. Also gives additional reason to look at G3 only as G1/G2 are highly correlated with G3
+ggcorr(student)
+```
+
 ```{r}
 student <- student %>% filter(G3 != 0) %>% select(-G1, -G2)
 student %>% 
@@ -113,6 +124,13 @@ student %>%
   geom_vline(xintercept = mean(student$G3), lwd = 1, color = 'red') +
   labs(title = "Distribution of Final Math Grade", x="Final Grade", y="Count")
 ```
+
+### Any difference in correlation after we drop G3=0 records?
+```{r}
+#BB: I don't see any real differences
+ggcorr(student)
+```
+
 
 ### Covariates and their relation to Final Grade
 
