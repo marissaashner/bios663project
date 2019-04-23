@@ -426,8 +426,31 @@ summary(modelback)
 
 This model so far gives us the best R2 adjusted and the most significant variables.
 
+### Interaction Model (model.int)
+
+```{r, include = F}
+
+# looking at all possible interaction terms of variables chosen in modelback
+lm(G3 ~(schoolMS + sexM + Mjobhealth + Mjobservices + Fjobteacher + studytime + failures + 
+          schoolsupyes + famsupyes + paidyes + internetyes + goout + health + absences)^2, 
+   data = student_d) %>%
+  summary()
+```
+
+Of all possible interaction terms, several were significant. Among those, the most "interpretable" are studytime:schoolsupyes, studytime:famsupyes, studytime:goout, and schoolsupyes:goout. Interestingly, it appears that the effects of studytime are reduced when one goes out a lot; perhaps fatigue reduces the effectiveness of studying. 
+
 ```{r}
-modelsmall <- lm(G3 ~ Mjobhealth + Mjobservices + Fjobteacher + failures + schoolsupyes + goout, data = student_d)
+model.int <- lm(G3 ~ schoolMS + sexM + Mjobhealth + Mjobservices + Fjobteacher + studytime + 
+                  failures + schoolsupyes + famsupyes + paidyes + internetyes + goout + health +
+                  absences + studytime:schoolsupyes + studytime:famsupyes + studytime:goout + schoolsupyes:goout, 
+   data = student_d)
+```
+
+### Small Model
+
+```{r}
+modelsmall <- lm(G3 ~ Mjobhealth + Mjobservices + Fjobteacher + failures + schoolsupyes + goout,
+                 data = student_d)
 ```
 
 #### Diagnostics of modelback
@@ -447,6 +470,28 @@ p1 <- ggplot(data = dat_resid) + geom_histogram(aes(RESID), bins = 25) + labs(x 
 p2 <- ggplot(data = dat_resid) + geom_point(aes(PRED, RESID)) + geom_hline(aes(yintercept = 0)) + labs(x = "Predicted Values", y = "Studentized Residuals")
 cowplot::plot_grid(p1, p2)
 ```
+
+### Diagnostics of model.int
+
+```{r}
+stud_resid = rstudent(model.int)
+dat_resid <- data.frame(RESID = stud_resid, ABS = abs(stud_resid), PRED = model.int$fitted.values)
+dat_resid %>% arrange(-ABS) %>% filter(ABS > 2)
+```
+
+```{r}
+nortest::ad.test(dat_resid$RESID)
+```
+
+Normality assumption is justified for model.int
+
+```{r, fig.height=4, fig.width=8}
+p1 <- ggplot(data = dat_resid) + geom_histogram(aes(RESID), bins = 25) + labs(x = "Studentized Residuals")
+p2 <- ggplot(data = dat_resid) + geom_point(aes(PRED, RESID)) + geom_hline(aes(yintercept = 0)) + labs(x = "Predicted Values", y = "Studentized Residuals")
+cowplot::plot_grid(p1, p2)
+```
+
+model.int satisfies linearity and homogeneity assumptions.
 
 ### Diagnostics of modelsmall
 
@@ -494,11 +539,11 @@ Aside from looking at the Adjusted R2, can look at the AIC or SBC/BIC (smaller i
 
 ```{r}
 ## AIC Comparison
-aic <- c(AIC(model1), AIC(model2), AIC(modelback), AIC(modelsmall))
-bic <- c(BIC(model1), BIC(model2), BIC(modelback), BIC(modelsmall))
-adjR <- c( summary(model1)$adj.r.sq,  summary(model2)$adj.r.sq,  summary(modelback)$adj.r.sq, summary(modelsmall)$adj.r.sq)
+aic <- c(AIC(model1), AIC(model2), AIC(modelback), AIC(model.int), AIC(modelsmall))
+bic <- c(BIC(model1), BIC(model2), BIC(modelback), BIC(model.int), BIC(modelsmall))
+adjR <- c( summary(model1)$adj.r.sq,  summary(model2)$adj.r.sq,  summary(modelback)$adj.r.sq, summary(model.int)$adj.r.sq, summary(modelsmall)$adj.r.sq)
 
-selection <- data.frame(model = c("Model1: Full Model", "Model2: No Intercept", "Model3: Stepwise Model", "Model 4: Reduced Stepwise Model"), AICs = aic, BICs = bic, Adjusted.R.Squared = adjR)
+selection <- data.frame(model = c("Model1: Full Model", "Model2: No Intercept", "Model3: Stepwise Model", "Model 4: Stepwise Model + Interaction Termsg", "Model 5: Reduced Stepwise Model"), AICs = aic, BICs = bic, Adjusted.R.Squared = adjR)
 selection %>% knitr::kable(align = c("c", "c"))
 ```
 
