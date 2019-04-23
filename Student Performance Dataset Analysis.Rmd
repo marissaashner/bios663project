@@ -634,7 +634,7 @@ cowplot::plot_grid(p1, p2)
 ## Model 7: Reduced Interaction Model
 
 ```{r}
-smallint <- lm(G3 ~ Mjobhealth + Mjobservices + Fjobteacher + studytime + failures + schoolsupyes + absences + studytime*schoolsupyes, data = student_d)
+smallint <- lm(G3 ~ Mjobhealth + Mjobservices + Fjobteacher + studytime + failures + schoolsupyes + absences + health + goout + studytime*schoolsupyes + studytime*goout, data = student_d)
 summary(smallint)
 ```
 
@@ -696,6 +696,8 @@ student <- student %>%
 Aside from looking at the Adjusted R2, can look at the AIC or SBC/BIC (smaller is better in both cases) **can add more/different models to this code, but here is the basis**
 
 ```{r}
+library(tidyverse)
+
 aic <- c(AIC(model1), AIC(model2), AIC(modelback), AIC(model.int), AIC(modelsmall), AIC(smallint))
 bic <- c(BIC(model1), BIC(model2), BIC(modelback), BIC(model.int), BIC(modelsmall), BIC(smallint))
 adjR <- c( summary(model1)$adj.r.sq,  summary(model2)$adj.r.sq,  summary(modelback)$adj.r.sq, summary(model.int)$adj.r.sq, summary(modelsmall)$adj.r.sq, summary(smallint)$adj.r.sq)
