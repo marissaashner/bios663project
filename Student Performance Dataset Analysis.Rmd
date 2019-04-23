@@ -26,6 +26,7 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 library(tidyverse)
 library(ggplot2)
 library(GGally)
+library(RColorBrewer)
 ```
 
 ```{r, warning = FALSE}
@@ -168,7 +169,8 @@ student %>%
 
 ggplot(student, aes(absences, G3)) +
   geom_jitter() +
-  geom_smooth()
+  geom_smooth() +
+  labs(title = "Final Grade by School Absences", x = "Number of school absences", y = "Final grade")
 ```
 
 Since the variable "absences" has a greater range of values than most of the other variables, and since after 22 absences the data becomes extremely sparse, we decided to group 23-93 absences within the value "23."
@@ -228,6 +230,16 @@ ggplot(student, aes(absences, G3)) +
   geom_jitter() +
   geom_smooth()
 
+student %>% 
+  mutate(absences = factor(absences)) %>% 
+  ggplot(aes(absences, G3, fill = absences)) +
+  geom_violin(color = "gray") +
+  geom_jitter(width = 0.2, alpha = 0.5) +
+  labs(title = "Final Grade by School Absences", x = "School Absences", y = "Final grade") +
+  scale_fill_brewer(palette="Pastel2") +
+  theme(legend.position="none") +
+  scale_x_discrete(labels=c("<5", "5-9", "10-14", "15-19", ">20"))
+
 ```
 
 
@@ -242,21 +254,30 @@ student %>%
   geom_violin() +
   geom_jitter(width = 0.2, alpha = 0.5)
 
+
 # workday alcohol consumption (5 is highest)
 student %>% 
   mutate(Dalc = factor(Dalc)) %>% 
-  ggplot(aes(Dalc, G3)) +
-  geom_violin() +
-  geom_jitter(width = 0.2, alpha = 0.5)
+  ggplot(aes(Dalc, G3, fill = Dalc)) +
+  geom_violin(color = "gray") +
+  geom_jitter(width = 0.2, alpha = 0.5) +
+  labs(title = "Final Grade by Workday Alcohol Consumption", x = "Level of workday alcohol consumption (5 is very high)", y = "Final grade") +
+  scale_fill_brewer(palette="Pastel2") +
+  theme(legend.position="none")
 
-## Time spend Studying
+## Time spent Studying
 student %>% 
   mutate(studytime = factor(studytime)) %>% 
-  ggplot(aes(studytime, G3)) +
-  geom_violin() +
-  geom_jitter(width = 0.2, alpha = 0.5)
+  ggplot(aes(studytime, G3, fill = studytime)) +
+  geom_violin(color = "gray") +
+  geom_jitter(width = 0.2, alpha = 0.5) +
+  labs(title = "Final Grade by Time Spent Studying", x = "Weekly Study Time", y = "Final grade") +
+  scale_fill_brewer(palette="Pastel2") +
+  theme(legend.position="none") +
+  scale_x_discrete(labels=c("<2 hours", "2-5 hours", "5-10 hours", ">10 hours"))
 
-## Time spend travelling
+
+## Time spent travelling
 student %>% 
   mutate(traveltime = factor(traveltime)) %>% 
   ggplot(aes(traveltime, G3)) +
