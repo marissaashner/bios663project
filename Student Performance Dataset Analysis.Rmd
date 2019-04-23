@@ -36,7 +36,24 @@ student_all <- read.table("student-mat.csv", sep=";", header=T)
 student_all <- as_tibble(student)
 ```
 
-## Introduction 
+## Introduction
+
+Portugal, in 2006, had an early school leaving rate of nearly 40% for 18-24 year olds, while the EU average was 15% (Eurostat 2007). Various analyses and interventions, therefore, have targeted school success in Portuguese adolescents and attempted to improve education overall. Portuguese students are lacking in mathematics performance, specifically.
+
+We are therefore analyzing student data from two Portuguese secondary schools. This dataset measures mathematics course grade as the outcome, as a result of 30 predictors that range from demographic factors and family situation to student habits and extracurricular involvement. Specifically, data was collected from 395 students across an age range of 15-22 years.
+
+Portuguese schools have a five-level grade classification system. With a final score measured from 0-20, categories are as follows: Excellent (16-20), Good (14-15), Satisfactory (12-13), Sufficient (10-11), Fail (0-9). For the purposes of this analysis, however, we analyzed exact score rather than score category.
+
+In this analysis, we wish to predict student success in secondary school math as a result of two types of factors:
+
+1. Unchangeable (family situation, parents' jobs, home location, etc.)
+1. Targetable behavior (alcohol consumption, absences, extracurricular involvement, etc.)
+
+The potential outcomes of this analysis are:
+
+1. Identification of student behaviors that can be targeted through school-related programs or interventions in order to increase success
+1. Indentification of inherent factors present in certain students' backgrounds that may put them at a disadvantage to begin with. Early identification without discrimination could result in these students being helped more effectively along the way.
+
 
 ## Data Description 
 
