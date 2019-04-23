@@ -24,11 +24,16 @@ pre { /* Code block - determines code spacing between lines */
 ```{r, include = FALSE, warning = FALSE}
 knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 library(tidyverse)
+library(ggplot2)
+library(GGally)
 ```
 
 ```{r, warning = FALSE}
 student <- read.table("student-mat.csv", sep=";", header=T)
 student <- as_tibble(student)
+
+student_all <- read.table("student-mat.csv", sep=";", header=T)
+student_all <- as_tibble(student)
 ```
 
 ## Introduction 
@@ -106,13 +111,27 @@ imputed_data$imp$G3
 imputed<-complete(imputed_data)
 
 
+### Correlation for all continuous variables
+```{r}
+#Note this throws a warning about variables being non-numeric but still produces output for all numeric arguments. Also gives additional reason to look at G3 only as G1/G2 are highly correlated with G3
+ggcorr(student)
+```
+
 ```{r}
 student <- student %>% filter(G3 != 0) %>% select(-G1, -G2)
+student_all <- student_all %>% select(-G1, -G2)
 student %>% 
   ggplot(aes(G3)) + geom_histogram(binwidth = 1, color='black', fill = 'grey') + 
   geom_vline(xintercept = mean(student$G3), lwd = 1, color = 'red') +
   labs(title = "Distribution of Final Math Grade", x="Final Grade", y="Count")
 ```
+
+### Any difference in correlation after we drop G3=0 records?
+```{r}
+#BB: I don't see any real differences
+ggcorr(student)
+```
+
 
 ### Covariates and their relation to Final Grade
 
@@ -165,6 +184,15 @@ ggplot(student, aes(absences, G3)) +
 
 # Binning
 student <- student %>% 
+  mutate(absences = case_when(
+                      absences < 5 ~ 1L, 
+                      absences >= 5 & absences < 10 ~ 2L,
+                      absences >= 10 & absences < 15 ~ 3L,
+                      absences >= 15 & absences < 20 ~ 4L,
+                      absences >= 20 ~ 5L,
+                      TRUE ~ .$absences))
+
+student_all <- student_all %>% 
   mutate(absences = case_when(
                       absences < 5 ~ 1L, 
                       absences >= 5 & absences < 10 ~ 2L,
@@ -232,6 +260,9 @@ Based on these plots, we decided to remove the variable "guardian" from our data
 ```{r}
 student <- student %>% 
   select(-guardian)
+
+student_all <- student_all %>% 
+  select(-guardian)
 ```
 
 ### Initial BIC/R^2
@@ -280,6 +311,12 @@ VIF = car::vif(model1)
 Tol = 1/VIF
 df = data.frame(Variable = names(VIF), VIF = VIF, Tolerance = Tol)
 df %>% arrange(desc(VIF)) %>% head(10) %>% knitr::kable(align = c("c", "c"))
+
+
+#set up dataframe for all students dataset:
+covariates_int_all <- model.matrix(G3 ~ ., data = student_all )
+covariates_all <- covariates_int_all %>% as.data.frame() %>% select(-`(Intercept)`)
+student_d_all <- data.frame(G3 = student_all$G3, covariates_all)
 ```
 
 Displayed above are the covariates with the highest Variance Inflation Factors.
@@ -462,6 +499,7 @@ model.int <- lm(G3 ~ schoolMS + sexM + Mjobhealth + Mjobservices + Fjobteacher +
                   failures + schoolsupyes + famsupyes + paidyes + internetyes + goout + health +
                   absences + studytime:schoolsupyes + studytime:famsupyes + studytime:goout + schoolsupyes:goout, 
    data = student_d)
+summary(model.int)
 ```
 
 ### Diagnostics of model.int
@@ -491,7 +529,6 @@ modelsmall <- lm(G3 ~ Mjobhealth + Mjobservices + Fjobteacher + failures + schoo
 summary(modelsmall)
 ```
 
-
 model.int satisfies linearity and homogeneity assumptions.
 
 ### Diagnostics of modelsmall
@@ -516,6 +553,31 @@ cowplot::plot_grid(p1.small, p2.small)
 
 The small model also appears to satisfy the diagnostic checks for homogeneity and linearity. Existence is trivial, but we may to discuss limitations of the independence assumption (maybe kids form study groups or grades are based on a curve)
 
+## Model 7: Small Interaction
+
+```{r}
+smallint <- lm(G3 ~ Mjobhealth + Mjobservices + Fjobteacher + studytime + failures + schoolsupyes + absences + studytime*schoolsupyes, data = student_d)
+summary(smallint)
+```
+
+### Diagnostics of Reduced Interaction Model
+
+```{r}
+stud_resid = rstudent(smallint)
+dat_resid <- data.frame(RESID = stud_resid, ABS = abs(stud_resid), PRED = smallint$fitted.values)
+dat_resid %>% arrange(-ABS) %>% filter(ABS > 2)
+```
+
+```{r}
+nortest::ad.test(dat_resid$RESID)
+```
+
+```{r, fig.height=4, fig.width=8}
+p1 <- ggplot(data = dat_resid) + geom_histogram(aes(RESID), bins = 25) + labs(x = "Studentized Residuals")
+p2 <- ggplot(data = dat_resid) + geom_point(aes(PRED, RESID)) + geom_hline(aes(yintercept = 0)) + labs(x = "Predicted Values", y = "Studentized Residuals")
+cowplot::plot_grid(p1, p2)
+```
+
 ## Model 6: Best Subset Model
 
 ```{r}
@@ -524,6 +586,8 @@ summary(model6)
 ```
 
 ### Diagnostics of Model 6
+
+** keep this or should we not use stuff from the subset analysis?
 
 ```{r}
 stud_resid = rstudent(model6)
@@ -540,6 +604,14 @@ p1 <- ggplot(data = dat_resid) + geom_histogram(aes(RESID), bins = 25) + labs(x 
 p2 <- ggplot(data = dat_resid) + geom_point(aes(PRED, RESID)) + geom_hline(aes(yintercept = 0)) + labs(x = "Predicted Values", y = "Studentized Residuals")
 cowplot::plot_grid(p1, p2)
 ```
+
+## Model 6 All Subjects: Sensitivity analysis for dropping all subjects with G3=0
+
+```{r}
+model6_all <- lm(G3 ~ Mjobhealth + Mjobservices + Fjobteacher + failures + schoolsupyes + goout + health + absences, data = student_d_all)
+summary(model6_all)
+```
+
 
 ## Extreme Residual Analysis  
 
@@ -564,11 +636,11 @@ take out values that are outlliers and run the regression again?
 Aside from looking at the Adjusted R2, can look at the AIC or SBC/BIC (smaller is better in both cases) **can add more/different models to this code, but here is the basis**
 
 ```{r}
-aic <- c(AIC(model1), AIC(model2), AIC(modelback), AIC(model.int), AIC(modelsmall), AIC(model6))
-bic <- c(BIC(model1), BIC(model2), BIC(modelback), BIC(model.int), BIC(modelsmall), BIC(model6))
-adjR <- c( summary(model1)$adj.r.sq,  summary(model2)$adj.r.sq,  summary(modelback)$adj.r.sq, summary(model.int)$adj.r.sq, summary(modelsmall)$adj.r.sq, summary(model6)$adj.r.sq)
+aic <- c(AIC(model1), AIC(model2), AIC(modelback), AIC(model.int), AIC(modelsmall), AIC(model6), AIC(smallint))
+bic <- c(BIC(model1), BIC(model2), BIC(modelback), BIC(model.int), BIC(modelsmall), BIC(model6), BIC(smallint))
+adjR <- c( summary(model1)$adj.r.sq,  summary(model2)$adj.r.sq,  summary(modelback)$adj.r.sq, summary(model.int)$adj.r.sq, summary(modelsmall)$adj.r.sq, summary(model6)$adj.r.sq, summary(smallint)$adj.r.sq)
 
-selection <- data.frame(model = c("Model 1: Full Model", "Model 2: No Intercept", "Model 3: Stepwise Model", "Model 4: Stepwise Model + Interaction Terms", "Model 5: Reduced Stepwise Model", "Model 6: Best Subset Model"), AICs = aic, BICs = bic, Adjusted.R.Squared = adjR)
+selection <- data.frame(model = c("Model 1: Full Model", "Model 2: No Intercept", "Model 3: Stepwise Model", "Model 4: Stepwise Model + Interaction Terms", "Model 5: Reduced Stepwise Model", "Model 6: Best Subset Model", "Model 7: Reduced Interaction Model"), AICs = aic, BICs = bic, Adjusted.R.Squared = adjR)
 selection %>% knitr::kable(align = c("c", "c"))
 ```
 
