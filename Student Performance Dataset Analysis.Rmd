@@ -276,6 +276,8 @@ Based on these plots, we decided to remove the variable "guardian" from our data
 We also observed that students in this dataset were from two different schools. Using school in our prediction of math course success, although it may increase prediction accuracy, would make our analysis less generalizable to the overall population of students. Since the overarching goal of this analysis is to identify factors that systematically affect secondary school student success in math courses, we decided to remove school as a predictor variable.
 
 ```{r}
+student$age <- student$age - min(student$age)
+
 student <- student %>% 
   select(-guardian) %>%
   select(-school)
@@ -375,7 +377,7 @@ PCs_sscp$rotation[1:17,36:37]
 Above shows the last 2 PC's of the Scaled SSCP Matrix for the 1st-17th covariates (the rest have values close to 0). We can see that the 8th and 11-17th covariates may be collinear with the intercept. These covariates are listed below.
 
 ```{r}
-colnames(student_d)[c(8, 11:17)]
+colnames(student_d)[c(7, 10:16)]
 ```
 
 Many of these are factor variables that have reference values in the itnercept, so it makes sense they migh tbe collinear. Not going to remove any.
@@ -657,7 +659,7 @@ We decide to further remove a few outliers informally to increase the accuracy o
 table(student$age)
 
 student <- student %>%
-  filter(age < 20)
+  filter(age < 20-15)
 ```
 
 
