@@ -19,11 +19,11 @@ code.r{ /* Code block */
 pre { /* Code block - determines code spacing between lines */
     font-size: 10px;
 }
-h1 { font-size: 24px; }
+h1 { font-size: 22px; }
 
-h2 { font-size: 22px; }
+h2 { font-size: 20px; }
 
-h3 { font-size: 20px; }
+h3 { font-size: 18px; }
 
 </style>
 
@@ -106,10 +106,11 @@ For this analysis, we will be considering the `G3` final grade as our response.
 
 ## Expoloratory Data Analysis and Variable Filtering
 
-### Distribution of the Response Variable 
+Write a paragraph about how it went here. Refer to plots in appendix. Maybe pick one or two plots to go here depending on room.
 
 ```{r}
-student %>% 
+### Distribution of the Response Variable 
+outcomeplot1 <- student %>% 
   ggplot(aes(G3)) + geom_histogram(binwidth = 1, color='black', fill = 'grey') + 
   geom_vline(xintercept = mean(student$G3), lwd = 1, color = 'red') +
   labs(title = "Distribution of Final Math Grade", x="Final Grade", y="Count")
@@ -133,33 +134,30 @@ summary(imputed_data)
 imputed_data$imp$G3
 imputed<-complete(imputed_data)
 
-
-### Correlation for all continuous variables
 ```{r}
+### Correlation for all continuous variables
 #Note this throws a warning about variables being non-numeric but still produces output for all numeric arguments. Also gives additional reason to look at G3 only as G1/G2 are highly correlated with G3
-ggcorr(student)
+corrplot1 <- ggcorr(student)
 ```
 
 ```{r}
 student <- student %>% filter(G3 != 0) %>% select(-G1, -G2)
 student_all <- student_all %>% select(-G1, -G2)
-student %>% 
+outcomeplot2 <- student %>% 
   ggplot(aes(G3)) + geom_histogram(binwidth = 1, color='black', fill = 'grey') + 
   geom_vline(xintercept = mean(student$G3), lwd = 1, color = 'red') +
   labs(title = "Distribution of Final Math Grade", x="Final Grade", y="Count")
 ```
 
-### Any difference in correlation after we drop G3=0 records?
 ```{r}
+### Any difference in correlation after we drop G3=0 records?
 #BB: I don't see any real differences
-ggcorr(student)
+corrplot2 <- ggcorr(student)
 ```
 
-
-### Covariates and their relation to Final Grade
-
 ```{r}
-student %>% 
+### Covariates and their relation to Final Grade
+allvars <- student %>% 
   gather(key = "Variable", value = "Value", -G3) %>% 
   ggplot(aes(Value, G3)) + facet_wrap(~ Variable, scales = "free") + 
   geom_boxplot()
@@ -167,16 +165,16 @@ student %>%
 
 ```{r}
 ## visualizing absences
-student %>%
+abs1 <- student %>%
   # filter(absences < 23) %>%
   mutate(absences = factor(absences)) %>%
   ggplot(aes(absences, G3)) +
   geom_boxplot()
 
-ggplot(student, aes(absences, G3)) +
+abs2 <- ggplot(student, aes(absences, G3)) +
   geom_jitter() +
   geom_smooth() +
-  labs(title = "Final Grade by School Absences", x = "Number of school absences", y = "Final grade")
+  labs(title = "Final Grade by Absences", x = "Number of school absences", y = "Final grade")
 ```
 
 Since the variable "absences" has a greater range of values than most of the other variables, and since after 22 absences the data becomes extremely sparse, we decided to group 23-93 absences within the value "23."
@@ -189,16 +187,15 @@ student <- student %>%
                       TRUE ~ .$absences))
 
 ## visualizing new absences variable
-student %>%
+abs3 <- student %>%
   # filter(absences < 23) %>%
   mutate(absences = factor(absences)) %>%
   ggplot(aes(absences, G3)) +
   geom_boxplot()
 
-ggplot(student, aes(absences, G3)) +
+abs4 <- ggplot(student, aes(absences, G3)) +
   geom_jitter() +
   geom_smooth()
-
 ```
 
 "Absences" still has a much greater spread of values than the other variables, so we will try binning them to see how that effects our models. 
@@ -226,35 +223,37 @@ student_all <- student_all %>%
                       TRUE ~ .$absences))
 
 ## visualizing new absences variable
-student %>%
+abs5 <- student %>%
   # filter(absences < 23) %>%
   mutate(absences = factor(absences)) %>%
   ggplot(aes(absences, G3)) +
   geom_boxplot()
 
-ggplot(student, aes(absences, G3)) +
+abs6 <- ggplot(student, aes(absences, G3)) +
   geom_jitter() +
   geom_smooth()
 
-student %>% 
+abs7 <- student %>% 
   mutate(absences = factor(absences)) %>% 
   ggplot(aes(absences, G3, fill = absences)) +
   geom_violin(color = "gray") +
   geom_jitter(width = 0.2, alpha = 0.5) +
-  labs(title = "Final Grade by School Absences", x = "School Absences", y = "Final grade") +
+  labs(title = "Final Grade by Absences", x = "School Absences", y = "Final grade") +
   scale_fill_brewer(palette="Pastel2") +
   theme(legend.position="none") +
   scale_x_discrete(labels=c("<5", "5-9", "10-14", "15-19", ">20"))
 
 ```
 
-
+```{r, fig.height = 3, fig.width = 6}
+cowplot::plot_grid(abs2, abs7)
+```
 
 ```{r}
 ## visualizing alcohol consumption
 
 # weekend alcohol consumption (5 is highest)
-student %>% 
+wealcoholRDA <- student %>% 
   mutate(Walc = factor(Walc)) %>% 
   ggplot(aes(Walc, G3)) +
   geom_violin() +
@@ -262,7 +261,7 @@ student %>%
 
 
 # workday alcohol consumption (5 is highest)
-student %>% 
+wdalcoholRDA <- student %>% 
   mutate(Dalc = factor(Dalc)) %>% 
   ggplot(aes(Dalc, G3, fill = Dalc)) +
   geom_violin(color = "gray") +
@@ -272,7 +271,7 @@ student %>%
   theme(legend.position="none")
 
 ## Time spent Studying
-student %>% 
+studyingRDA <- student %>% 
   mutate(studytime = factor(studytime)) %>% 
   ggplot(aes(studytime, G3, fill = studytime)) +
   geom_violin(color = "gray") +
@@ -284,14 +283,14 @@ student %>%
 
 
 ## Time spent travelling
-student %>% 
+travelRDA <- student %>% 
   mutate(traveltime = factor(traveltime)) %>% 
   ggplot(aes(traveltime, G3)) +
   geom_violin() +
   geom_jitter(width = 0.2, alpha = 0.5)
 
 ## Guardian
-student %>% 
+guardianRDA <- student %>% 
   mutate(guardian = factor(guardian)) %>% 
   ggplot(aes(guardian, G3)) +
   geom_violin() +
@@ -316,6 +315,7 @@ student_all <- student_all %>%
 
 ### Initial BIC/R^2
 Just to get an initial sense of influential variables we can look at all variables up to this point and examine fit statistics. This bit of code will look at permutations of all possible models up to nvmax and then report the best model based on fit criteria. For example, with nvmax of 30 it will produce the best model for 1 covariate, 2 covariates...up to the full model. 
+
 ```{r}
 #Based on results the best models fall within 5-20 vars, so I only considered 20 variables in this run
 best_subset <- leaps::regsubsets(G3 ~ ., student, nvmax = 20, method='exhaustive')
@@ -345,7 +345,6 @@ coef(best_subset, 8)
 coef(best_subset, 7)
 # We lose health when we drop to 7 variables. Otherwise all variables remain the same and are very similar in their effect size.
 ```
-
 
 ### Collinearity Analysis 
 
@@ -415,46 +414,33 @@ Many of these are factor variables that have reference values in the itnercept, 
 
 There are many types of models to consider when building a regression classifier, such as Multiple Linear Regression, ANOVA, Linear Mixed Models, and Logistic/Poisson Regression. Classically, Linear Mixed Models are used when observations are related and Logistic/Poisson Regression are used for binrary outcomes. Since we are assuming our observations (the students) are independent for our purpose, and the outcome variable (final grade) is numeric, we narrow our model search down to Multiple Linear Regression and ANOVA. Since, at least to start, we have many factor-type covariates, we begin exploring Multiple Linear Regression models and their fit to our data.
 
+In order to determine the validity of all models, we must test the assumptions of linear regression. These include homogeneity of variances and gaussian errors. All assumptions are met in all models explored, and more detailed plots and tests for these assumptions can be seen in the appendix. 
+
 ### Model 1: Full Model 
-*BB: since categorical vars are being grouped into several vars we have more than 30 Betas. I count 39 below.
 
 The first model we consider is a full model of all covariates possible and no interaction terms included. The model can be written as follows: 
 
-$$y = \beta_0 + \beta_1X_1 + ... + \beta_{37}X_{37} + \epsilon$$
+$$y = \beta_0 + \beta_1X_1 + ... + \beta_{36}X_{36} + \epsilon$$
 where $\beta_i$ represents ... and $X_i$ represents a covariate. There are more covariates than expected because each factor variable is recreated as a series of "dummy" variables. If a factor has $n$ levels, then there will be $n-1$ variables, and therefore parameters, corresponding to that covariate.
 
 ```{r}
 summary(model1)
 ```
 
-** ADJUSTED R2 of 0.256 BOO ** 
-
-#### Diagnostics
-
-In order to determine the validity of this model, we must test the assumptions of linear regression. These assumptions include homogeneity of variances and gaussian errors. 
-
 ```{r}
 stud_resid = rstudent(model1)
 dat_resid <- data.frame(RESID = stud_resid, ABS = abs(stud_resid), PRED = model1$fitted.values)
-dat_resid %>% arrange(-ABS) %>% filter(ABS > 2)
+#dat_resid %>% arrange(-ABS) %>% filter(ABS > 2)
 ```
-
-Since this set of largest studentized residuals are all greater than 2, it may be of interest to examine them in further detail. ** this part might be better in the outlier detection section ** 
-
-###### Gaussian Errors Assumption 
 
 ```{r}
-nortest::ad.test(dat_resid$RESID)
+nortest1 <- nortest::ad.test(dat_resid$RESID)
 ```
-
-From the code above, since the p-value 0.4184 is greater than $\alpha = 0.05$, we accept the null hypothesis that the residuals are normally distributed. 
-
-###### Homogeneity of Variances (and Gaussian Errors) Assumptions
 
 ```{r, fig.height=4, fig.width=8}
 p1 <- ggplot(data = dat_resid) + geom_histogram(aes(RESID), bins = 25) + labs(x = "Studentized Residuals")
 p2 <- ggplot(data = dat_resid) + geom_point(aes(PRED, RESID)) + geom_hline(aes(yintercept = 0)) + labs(x = "Predicted Values", y = "Studentized Residuals")
-cowplot::plot_grid(p1, p2)
+diagnostics1 <- cowplot::plot_grid(p1, p2)
 ```
 
 ### Model 2: No Intercept
@@ -466,24 +452,20 @@ model2 <- lm(G3 ~ . -1, data = student_d)
 summary(model2)
 ```
 
-** ADJUSTED R2 OF .9421 !!!!!! ** 
-
-#### Diagnostics
-
 ```{r}
 stud_resid = rstudent(model2)
 dat_resid <- data.frame(RESID = stud_resid, ABS = abs(stud_resid), PRED = model2$fitted.values)
-dat_resid %>% arrange(-ABS) %>% filter(ABS > 2)
+#dat_resid %>% arrange(-ABS) %>% filter(ABS > 2)
 ```
 
 ```{r}
-nortest::ad.test(dat_resid$RESID)
+nortest2 <- nortest::ad.test(dat_resid$RESID)
 ```
 
 ```{r, fig.height=4, fig.width=8}
 p1 <- ggplot(data = dat_resid) + geom_histogram(aes(RESID), bins = 25) + labs(x = "Studentized Residuals")
 p2 <- ggplot(data = dat_resid) + geom_point(aes(PRED, RESID)) + geom_hline(aes(yintercept = 0)) + labs(x = "Predicted Values", y = "Studentized Residuals")
-cowplot::plot_grid(p1, p2)
+diagnostics2 <- cowplot::plot_grid(p1, p2)
 ```
 
 ### Model 3: Stepwise Model
@@ -512,28 +494,25 @@ summary(modelback)
 
 This model so far gives us the best R2 adjusted and the most significant variables.
 
-#### Diagnostics of modelback
-
 ```{r}
 stud_resid = rstudent(modelback)
 dat_resid <- data.frame(RESID = stud_resid, ABS = abs(stud_resid), PRED = modelback$fitted.values)
-dat_resid %>% arrange(-ABS) %>% filter(ABS > 2)
+#dat_resid %>% arrange(-ABS) %>% filter(ABS > 2)
 ```
 
 ```{r}
-nortest::ad.test(dat_resid$RESID)
+nortest3 <- nortest::ad.test(dat_resid$RESID)
 ```
 
 ```{r, fig.height=4, fig.width=8}
 p1 <- ggplot(data = dat_resid) + geom_histogram(aes(RESID), bins = 25) + labs(x = "Studentized Residuals")
 p2 <- ggplot(data = dat_resid) + geom_point(aes(PRED, RESID)) + geom_hline(aes(yintercept = 0)) + labs(x = "Predicted Values", y = "Studentized Residuals")
-cowplot::plot_grid(p1, p2)
+diagnostics3 <- cowplot::plot_grid(p1, p2)
 ```
 
 ## Model 4: Interaction Model (model.int)
 
 ```{r, include = F}
-
 # looking at all possible interaction terms of variables chosen in modelback
 lm(G3 ~(sexM + Mjobhealth + Mjobservices + Fjobteacher + studytime + failures + 
           schoolsupyes + famsupyes + paidyes + internetyes + goout + health + absences)^2, 
@@ -551,24 +530,20 @@ model.int <- lm(G3 ~ sexM + Mjobhealth + Mjobservices + Fjobteacher + studytime 
 summary(model.int)
 ```
 
-### Diagnostics of model.int
-
 ```{r}
 stud_resid = rstudent(model.int)
 dat_resid <- data.frame(RESID = stud_resid, ABS = abs(stud_resid), PRED = model.int$fitted.values)
-dat_resid %>% arrange(-ABS) %>% filter(ABS > 2)
+#dat_resid %>% arrange(-ABS) %>% filter(ABS > 2)
 ```
 
 ```{r}
-nortest::ad.test(dat_resid$RESID)
+nortest4 <- nortest::ad.test(dat_resid$RESID)
 ```
-
-Normality assumption is justified for model.int
 
 ```{r, fig.height=4, fig.width=8}
 p1 <- ggplot(data = dat_resid) + geom_histogram(aes(RESID), bins = 25) + labs(x = "Studentized Residuals")
 p2 <- ggplot(data = dat_resid) + geom_point(aes(PRED, RESID)) + geom_hline(aes(yintercept = 0)) + labs(x = "Predicted Values", y = "Studentized Residuals")
-cowplot::plot_grid(p1, p2)
+diagnostics4 <- cowplot::plot_grid(p1, p2)
 ```
 
 ## Model 5: Reduced Stepwise Model
@@ -585,27 +560,21 @@ modelsmall <- lm(G3 ~ Mjobhealth + Mjobservices + Fjobteacher + failures + schoo
 summary(modelsmall)
 ```
 
-### Diagnostics of modelsmall
-
 ```{r}
 stud_resid_small = rstudent(modelsmall)
 dat_resid_small <- data.frame(RESID = stud_resid_small, ABS = abs(stud_resid_small), PRED = modelsmall$fitted.values)
-dat_resid_small %>% arrange(-ABS) %>% filter(ABS > 2)
+#dat_resid_small %>% arrange(-ABS) %>% filter(ABS > 2)
 ```
 
 ```{r}
-nortest::ad.test(dat_resid_small$RESID)
+nortest5 <- nortest::ad.test(dat_resid_small$RESID)
 ```
-
-Small model satisfies conditions for Gaussian assumption.
 
 ```{r, fig.height=4, fig.width=8}
 p1.small <- ggplot(data = dat_resid_small) + geom_histogram(aes(RESID), bins = 25) + labs(x = "Studentized Residuals")
 p2.small <- ggplot(data = dat_resid_small) + geom_point(aes(PRED, RESID)) + geom_hline(aes(yintercept = 0)) + labs(x = "Predicted Values", y = "Studentized Residuals")
-cowplot::plot_grid(p1.small, p2.small)
+diagnostics5 <- cowplot::plot_grid(p1.small, p2.small)
 ```
-
-The small model also appears to satisfy the diagnostic checks for homogeneity and linearity. Existence is trivial, but we may to discuss limitations of the independence assumption (maybe kids form study groups or grades are based on a curve)
 
 ## Model 6: Reduced Interaction Model
 
@@ -614,28 +583,26 @@ smallint <- lm(G3 ~ Mjobhealth + Mjobservices + Fjobteacher + studytime + failur
 summary(smallint)
 ```
 
-### Diagnostics of Reduced Interaction Model
-
 ```{r}
 stud_resid = rstudent(smallint)
 dat_resid <- data.frame(RESID = stud_resid, ABS = abs(stud_resid), PRED = smallint$fitted.values)
-dat_resid %>% arrange(-ABS) %>% filter(ABS > 2)
+#dat_resid %>% arrange(-ABS) %>% filter(ABS > 2)
 ```
 
 ```{r}
-nortest::ad.test(dat_resid$RESID)
+nortest6 <- nortest::ad.test(dat_resid$RESID)
 ```
 
 ```{r, fig.height=4, fig.width=8}
 p1 <- ggplot(data = dat_resid) + geom_histogram(aes(RESID), bins = 25) + labs(x = "Studentized Residuals")
 p2 <- ggplot(data = dat_resid) + geom_point(aes(PRED, RESID)) + geom_hline(aes(yintercept = 0)) + labs(x = "Predicted Values", y = "Studentized Residuals")
-cowplot::plot_grid(p1, p2)
+diagnostics6 <- cowplot::plot_grid(p1, p2)
 ```
 
 ## Model 6 All Subjects: Sensitivity analysis for dropping all subjects with G3=0
 
 ```{r}
-model6_all <- lm(G3 ~ Mjobhealth + Mjobservices + Fjobteacher + failures + schoolsupyes + goout + health + absences, data = student_d_all)
+model6_all <- lm(G3 ~ Mjobhealth + Mjobservices + Fjobteacher + studytime + failures + schoolsupyes + absences + health + goout + studytime*schoolsupyes + studytime*goout, data = student_d_all)
 summary(model6_all)
 ```
 
@@ -669,7 +636,7 @@ student <- student %>%
 
 ## Model Selection and Interpretation
 
-Aside from looking at the Adjusted R2, can look at the AIC or SBC/BIC (smaller is better in both cases) **can add more/different models to this code, but here is the basis**
+Aside from looking at the Adjusted R2, can look at the AIC or SBC/BIC (smaller is better in both cases)
 
 ```{r}
 library(tidyverse)
@@ -690,4 +657,32 @@ selection %>% knitr::kable(align = c("c", "c"))
 [1] P. Cortez and A. Silva. Using Data Mining to Predict Secondary School Student Performance. In A. Brito and J. Teixeira Eds., Proceedings of 5th Future Business Technology Conference (FUBUTEC 2008) pp. 5-12, Porto, Portugal, April, 2008, EUROSIS, ISBN 978-9077381-39-7.
 
 [2] Eurostat, 2007. Early school-leavers. http://epp.eurostat.ec.europa.eu/.
+
+## Appendix 
+
+### Exploratory Data Analysis 
+
+```{r, fig.height = 3, fig.width = 6}
+cowplot::plot_grid(corrplot1, corrplot2)
+```
+
+```{r, fig.height = 3, fig.width = 6}
+cowplot::plot_grid(outcomeplot1, outcomeplot2)
+```
+
+```{r, fig.height = 6, fig.width = 9}
+cowplot::plot_grid(wdalcoholRDA, wealcoholRDA, travelRDA, studyingRDA, guardianRDA, nrow = 2)
+```
+
+### Model Diagnostics 
+
+```{r}
+nortests <- data.frame(model = c(1:6), "Anderson-Darling p-value" = c(nortest1$p.value, nortest2$p.value, nortest3$p.value, nortest4$p.value, nortest5$p.value, nortest6$p.value))
+nortests %>% knitr::kable(align = c("c", "c"))
+```
+
+```{r, fig.height = 18, fig.width = 6}
+cowplot::plot_grid(diagnostics1, diagnostics2, diagnostics3, diagnostics4, diagnostics5, diagnostics6, nrow = 6)
+```
+
 
