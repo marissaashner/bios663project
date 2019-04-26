@@ -286,39 +286,6 @@ student_all <- student_all %>%
   select(-school)
 ```
 
-### Initial BIC/R^2
-Just to get an initial sense of influential variables we can look at all variables up to this point and examine fit statistics. This bit of code will look at permutations of all possible models up to nvmax and then report the best model based on fit criteria. For example, with nvmax of 30 it will produce the best model for 1 covariate, 2 covariates...up to the full model. 
-
-```{r}
-#Based on results the best models fall within 5-20 vars, so I only considered 20 variables in this run
-best_subset <- leaps::regsubsets(G3 ~ ., student, nvmax = 20, method='exhaustive')
-results<-summary(best_subset)
-
-tibble(predictors = 1:20,
-       adj_R2 = results$adjr2,
-       Cp = results$cp,
-       BIC = results$bic) %>%
-  gather(statistic, value, -predictors) %>%
-  ggplot(aes(predictors, value, color = statistic)) +
-  geom_line(show.legend = F) +
-  geom_point(show.legend = F) +
-  facet_wrap(~ statistic, scales = "free")
-
-#which.max(results$adjr2)
-# 17 variables
-#which.min(results$bic)
-# 8 variables
-#which.min(results$cp)
-# 14 variables
-```
-### Looking at coefficients from best subset above based on BIC
-Notice based on BIC while the "best" option has 8 covariates, we really are not giving up much in the way of BIC using 7 covariates. We have presented both sets of coefficients here and generally want the more parsimonious model when all other criteria are the same.
-```{r}
-coef(best_subset, 8)
-coef(best_subset, 7)
-# We lose health when we drop to 7 variables. Otherwise all variables remain the same and are very similar in their effect size.
-```
-
 ### Collinearity Analysis 
 
 VIF and Tolerance 
@@ -625,6 +592,15 @@ selection %>% knitr::kable(align = c("c", "c"))
 ```
 
 ## Conclusion
+Ultimately, we would select either our reduced step-wise model (Model 5) or our reduced interaction model (Model 6) because both of these models were able to explain a similar amount of variation and almost identical fits based on BIC. The main decision would lie in whether the investigator values a more parsimonious model (Model 5) or one with interaction terms (Model 6).
+
+Regardless of the model, we were able able to find both static and modifiable variables that significantly impacted a student's final grade across several of our models. Certain parental career choices had a positive impact on final math grades, specifically, mother's in the health or service fields and fathers in a teaching field. This suggests that a parent's interests and/or work habits can have a positive influence on a student's academics. A static factor that negatively effected final grades was number of previous failures. This might be expected as students that have made poor grades in the past are likely to continue that trend without intervention. 
+
+The modifiable factors that significantly impacted overall grade were time spent studying, time going out and number of absences. These are also variables that might be expected to be indicative of a student's academic performance. We also found these variables to effect final grade in an explainable direction. Increased time studying lended itself to higher grades, while more time out with friends and increased abscenses negatively impacted final grades. 
+
+We would like to extend this dataset to span multiple years for future research. A longitudinal dataset with information on student dropout throughout secondary school would allow us to evaluate which factors significantly impact the dropout rate. This is seemingly the more important question for Portugal, based on the presentation of the dataset. 
+
+The power of these models relies on their utility in the classroom. If teachers are able to gather and model student data like this early in a school year, then the teachers will be able to best help students achieve a more desireable grade. More attention can be given to student's with negatively influential static factors. Student's can also be motiviated to change modifiable behavior early in the year to make an overall positive impact on their grade.
 
 ## References 
 
