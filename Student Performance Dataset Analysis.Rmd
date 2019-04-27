@@ -363,6 +363,8 @@ $$y = \beta_0 + \beta_1X_1 + ... + \beta_{36}X_{36} + \epsilon$$
 
 where $\beta_i$ represents ... and $X_i$ represents a covariate. There are more covariates than expected because each factor variable is recreated as a series of "dummy" variables. If a factor has $n$ levels, then there will be $n-1$ variables, and therefore parameters, corresponding to that covariate.
 
+It should be noted that the adjusted $R^2$ value for this model is `r summary(model1)$adj.r.sq`. 
+
 ```{r}
 #summary(model1)
 ```
@@ -393,6 +395,8 @@ $$y = \beta_1X_1 + ... + \beta_{36}X_{36} + \epsilon$$
 model2 <- lm(G3 ~ . -1, data = student_d)
 #summary(model2)
 ```
+
+It should be noted that the adjusted $R^2$ value for this model is `r summary(model2)$adj.r.sq`. 
 
 ```{r}
 stud_resid = rstudent(model2)
@@ -426,11 +430,13 @@ modelforward <- step(model1, direction = "forward", trace = F)
 #modelforward 
 ```
 
-$$y = \beta_0 + \beta_1SEXM + \beta_2AGE + \beta_3ADDRESSU + \beta_4MJOBHEALTH + \\ \beta_5MJOBSERVICES + \beta_6FJOBTEACHER + \beta_7STUDYTIME + \beta_8FAILURES + \\ \beta_9SCHOOLSUPYES + \beta_{10}FAMSUPYES + \beta_{11}GOOUT + \beta_{12}HEALTH + \\ \beta_{13}ABSENCES + \epsilon$$
+$$y = \beta_0 + \beta_1SEXM + \beta_2AGE + \beta_3ADDRESSU + \beta_4MJOBHEALTH +  \beta_5MJOBSERVICES + \beta_6FJOBTEACHER + \beta_7STUDYTIME + \beta_8FAILURES + \\ \beta_9SCHOOLSUPYES + \beta_{10}FAMSUPYES + \beta_{11}GOOUT + \beta_{12}HEALTH +  \beta_{13}ABSENCES + \epsilon$$
 
 ```{r}
-#summary(modelback)
+summary(modelback)$coefficients
 ```
+
+It should be noted that the adjusted $R^2$ value for this model is `r summary(modelback)$adj.r.sq`. 
 
 ```{r}
 stud_resid = rstudent(modelback)
@@ -460,15 +466,17 @@ lm(G3 ~(sexM + Mjobhealth + Mjobservices + Fjobteacher + studytime + failures +
 
 Of all possible interaction pairs, several were significant. Among those, the most "interpretable" are studytime:schoolsupyes, studytime:famsupyes, studytime:goout, and schoolsupyes:goout. Interestingly, it appears that the effects of studytime are reduced for high values of goout; this may suggest that going out increases fatigue or distractedness, leading to a decreased benefit from studying. We add these significant interactions to the Stepwise Model to create our fourth model as defined below: 
 
-$$y = \beta_0 + \beta_1SEXM + \beta_2AGE + \beta_3ADDRESSU + \beta_4MJOBHEALTH + \\ \beta_5MJOBSERVICES + \beta_6FJOBTEACHER + \beta_7STUDYTIME + \beta_8FAILURES + \\ \beta_9SCHOOLSUPYES + \beta_{10}FAMSUPYES + \beta_{11}GOOUT + \beta_{12}HEALTH + \\ \beta_{13}ABSENCES + \beta_{14}studytime:schoolsupyes + \beta_{15}studytime:famsupyes \\ + \beta_{16}studytime:goout + \beta_{17}schoolsupyes:goout + \epsilon$$
+$$y = \beta_0 + \beta_1SEXM + \beta_2AGE + \beta_3ADDRESSU + \beta_4MJOBHEALTH +  \beta_5MJOBSERVICES + \beta_6FJOBTEACHER + \beta_7STUDYTIME + \beta_8FAILURES + \\ \beta_9SCHOOLSUPYES + \beta_{10}FAMSUPYES + \beta_{11}GOOUT + \beta_{12}HEALTH +  \beta_{13}ABSENCES + \beta_{14}STUDYTIME*SCHOOLSUPYES + \beta_{15}STUDYTIME*FAMSUPYES \\ + \beta_{16}STUDYTIME*GOOUT + \beta_{17}SCHOOLSUPYES*GOOUT + \epsilon$$
 
 ```{r}
 model.int <- lm(G3 ~ sexM + Mjobhealth + Mjobservices + Fjobteacher + studytime + 
                   failures + schoolsupyes + famsupyes + paidyes + internetyes + goout + health +
                   absences + studytime:schoolsupyes + studytime:famsupyes + studytime:goout + schoolsupyes:goout, 
    data = student_d)
-#summary(model.int)
+summary(model.int)$coefficients 
 ```
+
+It should be noted that the adjusted $R^2$ value for this model is `r summary(model.int)$adj.r.sq`. 
 
 ```{r}
 stud_resid = rstudent(model.int)
@@ -490,12 +498,16 @@ diagnostics4 <- cowplot::plot_grid(p1, p2)
 
 In order to build a more parsimonious model with less parameters, we took the approach of choosing a cut-off for the Type-III p-values from the added last tests of models 3 and 4 to determine which variables were most important in predicting final grade and were most useful to include in the model. For the fifth model, the Reduced Stepwise Model, we choose the six variables that had a type-III p-value of less than 0.0001 from the Stepwise Model 3. The model is outlined below:
 
-$$y = \beta_0 + \beta_4MJOBHEALTH + \beta_5MJOBSERVICES + \beta_6FJOBTEACHER + \\ \beta_8FAILURES + \beta_9SCHOOLSUPYES + \beta_{11}GOOUT + \epsilon$$
+$$y = \beta_0 + \beta_1MJOBHEALTH + \beta_2MJOBSERVICES + \beta_3FJOBTEACHER + \beta_4FAILURES + \beta_5SCHOOLSUPYES + \beta_6GOOUT + \epsilon$$
 
 ```{r}
 modelsmall <- lm(G3 ~ Mjobhealth + Mjobservices + Fjobteacher + failures + schoolsupyes + goout, data = student_d)
 #summary(modelsmall)
+
+summary(modelsmall)$coefficients
 ```
+
+It should be noted that the adjusted $R^2$ value for this model is `r summary(modelsmall)$adj.r.sq`. 
 
 ```{r}
 stud_resid_small = rstudent(modelsmall)
@@ -517,12 +529,14 @@ diagnostics5 <- cowplot::plot_grid(p1.small, p2.small)
 
 For the fifth model, the Reduced Interaction Model, we choose the eleven variables that had a type-III p-value of less than 0.05 from the Interaction Model 4. If an interaction term was included, the base variables of that interaction term were also included, regardless of their significance. This model is outlined below:
 
-$$y = \beta_0 + \beta_1MJOBHEALTH + \beta_2MJOBSERVICES + \beta_3FJOBTEACHER + \\ \beta_4STUDYTIME + \beta_5FAILURES + \beta_6SCHOOLSUPYES + \beta_7GOOUT + \\ \beta_8HEALTH + \beta_9ABSENCES + \beta_10studytime:schoolsupyes + \\ \beta_11studytime:goout + \epsilon$$ 
+$$y = \beta_0 + \beta_1MJOBHEALTH + \beta_2MJOBSERVICES + \beta_3FJOBTEACHER +  \beta_4STUDYTIME + \beta_5FAILURES + \beta_6SCHOOLSUPYES + \beta_7GOOUT + \\ \beta_8HEALTH + \beta_9ABSENCES + \beta_{10}STUDYTIME*SCHOOLSUPYES +  \beta_{11}STUDYTIME*GOOUT + \epsilon$$ 
 
 ```{r}
 smallint <- lm(G3 ~ Mjobhealth + Mjobservices + Fjobteacher + studytime + failures + schoolsupyes + absences + health + goout + studytime*schoolsupyes + studytime*goout, data = student_d)
-#summary(smallint)
+summary(smallint)$coefficients
 ```
+
+It should be noted that the adjusted $R^2$ value for this model is `r summary(smallint)$adj.r.sq`. 
 
 ```{r}
 stud_resid = rstudent(smallint)
@@ -540,40 +554,12 @@ p2 <- ggplot(data = dat_resid) + geom_point(aes(PRED, RESID)) + geom_hline(aes(y
 diagnostics6 <- cowplot::plot_grid(p1, p2)
 ```
 
-## Model 6 All Subjects: Sensitivity analysis for dropping all subjects with G3=0
+### Model 6 All Subjects: Sensitivity analysis for dropping all subjects with G3 = 0
 
 ```{r}
 model6_all <- lm(G3 ~ Mjobhealth + Mjobservices + Fjobteacher + studytime + failures + schoolsupyes + absences + health + goout + studytime*schoolsupyes + studytime*goout, data = student_d_all)
 summary(model6_all)
 ```
-
-## Extreme Residual Analysis  
-
-Influence -- Cook's Distance
- - Values near 1 are bad 
-
-Outlier -- Leverage Values 
- - Values greater than 2*p/n are bad
-
-```{r}
-p <- modelback$coefficients %>% length()
-n <- nrow(student_d)
-levcutoff <- 2*p/n
-lev <- hatvalues(modelback)
-cook <- cooks.distance(modelback)
-```
-
-take out values that are outlliers and run the regression again?
-
-We decide to further remove a few outliers informally to increase the accuracy of our analysis. For example, we noticed that there were five students in the 20-22 age range. Since ages 15-18 had 70+ students per age, and age 19 had 19 students, we decided to remove the 20-22 year old students. For students of this age to be in secondary school, it is likely that they had certain extenuating circumstances that may not be represented in the dataset. Moreover, we simply have too few observations in this age range to be able to accurately analyze the effects of age on outcome in the 20+ region. Therefore, we went ahead and removed these students.
-
-```{r}
-table(student$age)
-
-student <- student %>%
-  filter(age < 20-15)
-```
-
 
 ## Model Selection and Interpretation
 
