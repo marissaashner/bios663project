@@ -87,7 +87,7 @@ outcomeplot1 <- student %>%
   labs(title = "Distribution of Final Math Grade", x="Final Grade", y="Count")
 ```
 
-```{r}
+```{r, include = FALSE }
 student %>% select(G1, G2, G3) %>% filter(G3 ==0 & G1 ==0 & G2 ==0)
 ```
 
@@ -288,9 +288,8 @@ student_all <- student_all %>%
 
 ### Collinearity Analysis 
 
-VIF and Tolerance 
-
-Explain results of this 
+Before running any models on our data, we want to check some computational diagnostics to see whether or not the covariates are collinear with each other or the intercept. To do that, we can first calculate the VIF and Tolerance values for each covariate. 
+The covariates with the highest VIF values are shown below. Usually, ****
 
 ```{r}
 covariates_int <- model.matrix(G3 ~ ., data = student )
@@ -309,7 +308,7 @@ covariates_all <- covariates_int_all %>% as.data.frame() %>% select(-`(Intercept
 student_d_all <- data.frame(G3 = student_all$G3, covariates_all)
 ```
 
-EigenAnalysis for the Correlation and Scaled SSCP Matrices 
+We then conduct an eigen-analysis of the correlation and scaled SSCP matrices to determine which covariates are most collinear with each other (via the correlation matrix) and with the intercept (via the scaled SSCP matrix). 
 
 ```{r}
 xtx = t(covariates_int)%*%covariates_int
@@ -346,19 +345,22 @@ Above shows the last 2 PC's of the Scaled SSCP Matrix for the 1st-17th covariate
 colnames(student_d)[c(7, 10:16)]
 ```
 
-Many of these are factor variables that have reference values in the itnercept, so it makes sense they migh tbe collinear. Not going to remove any.
+Many of these are factor variables that have reference values in the itnercept, so it makes sense they might be collinear. Therefore we decided not to remove any variables from our full model for collinearity issues.
+
+### HILE Gauss Assumptions 
+
+The homogeneity of variances, linearity, and gaussian errors asssumptions usually go hand in hand, and can be tested for each model using a residual analysis. For each model we run, we conduct an Anderson-Darling Test for Normality, and create residual plots. For all models in this report, all three of these diagnostics were met. The detailed tests and plots are in the Appendix. In terms of the existence assumption, we assume it holds since we have a finite sample. We also must assume the independence of observations assumption holds for our analysis, although we do not have enough information to fully support this claim. We are not given information on the students such as whether or not there are siblings or related students in the group, whether or not certain study groups were relevant, whether or not the classes were curved, or other qualities of the data that could result in a violation of this assumption. Therefore we move forward claiming all assumptions are satisified. 
 
 ## Models and Model Testing
 
 There are many types of models to consider when building a regression classifier, such as Multiple Linear Regression, ANOVA, Linear Mixed Models, and Logistic/Poisson Regression. Classically, Linear Mixed Models are used when observations are related and Logistic/Poisson Regression are used for binrary outcomes. Since we are assuming our observations (the students) are independent and the outcome variable (final grade) is numeric, we narrow our model search down to Multiple Linear Regression and ANOVA. Since, at the beginning, we have many factor-type covariates, we begin exploring Multiple Linear Regression models and their fit to our data.
-
-In order to determine the validity of all models, we must test the assumptions of linear regression. These include homogeneity of variances, linearity, and and gaussian errors. All assumptions are met in all models explored and more detailed plots and tests for these assumptions can be seen in the appendix.
 
 ### Model 1: Full Model 
 
 The first model we consider is a full model of all covariates possible and no interaction terms included. The model can be written as follows: 
 
 $$y = \beta_0 + \beta_1X_1 + ... + \beta_{36}X_{36} + \epsilon$$
+
 where $\beta_i$ represents ... and $X_i$ represents a covariate. There are more covariates than expected because each factor variable is recreated as a series of "dummy" variables. If a factor has $n$ levels, then there will be $n-1$ variables, and therefore parameters, corresponding to that covariate.
 
 ```{r}
@@ -410,6 +412,8 @@ diagnostics2 <- cowplot::plot_grid(p1, p2)
 
 ### Model 3: Stepwise Model
 
+We then employed forward selection, backward selection, and combined forward and backward selection. Forward selection alone gives the full model, while backward selection and combined selection yield the same 13 covariates, excluding the intercept. We then adopted the result of backward selection as model 3.
+
 ```{r}
 set.seed(12345)
 modelback <- step(model1, direction = "backward", trace = F)
@@ -422,15 +426,11 @@ modelforward <- step(model1, direction = "forward", trace = F)
 #modelforward 
 ```
 
-We then employed forward selection, backward selection, and combined forward and backward selection. Forward selection alone gives the full model, while backward selection and combined selection yield the same 13 covariates, excluding the intercept. We then adopted the result of backward selection as model 4.
-
-$$y = \beta_0 + \beta_1SEXM + \beta_2AGE + \beta_3ADDRESSU + \beta_4MJOBHEALTH + \beta_5MJOBSERVICES + \beta_6FJOBTEACHER + \beta_7STUDYTIME + \beta_8FAILURES + \beta_9SCHOOLSUPYES + \beta_{10}FAMSUPYES + \beta_{11}GOOUT + \beta_{12}HEALTH + \beta_{13}ABSENCES + \epsilon$$
+$$y = \beta_0 + \beta_1SEXM + \beta_2AGE + \beta_3ADDRESSU + \beta_4MJOBHEALTH + \\ \beta_5MJOBSERVICES + \beta_6FJOBTEACHER + \beta_7STUDYTIME + \beta_8FAILURES + \\ \beta_9SCHOOLSUPYES + \beta_{10}FAMSUPYES + \beta_{11}GOOUT + \beta_{12}HEALTH + \\ \beta_{13}ABSENCES + \epsilon$$
 
 ```{r}
 #summary(modelback)
 ```
-
-This model so far gives us the best R2 adjusted and the most significant variables.
 
 ```{r}
 stud_resid = rstudent(modelback)
@@ -448,7 +448,7 @@ p2 <- ggplot(data = dat_resid) + geom_point(aes(PRED, RESID)) + geom_hline(aes(y
 diagnostics3 <- cowplot::plot_grid(p1, p2)
 ```
 
-## Model 4: Interaction Model
+### Model 4: Interaction Model
 
 ```{r, include = F}
 # looking at all possible interaction terms of variables chosen in modelback
@@ -458,9 +458,9 @@ lm(G3 ~(sexM + Mjobhealth + Mjobservices + Fjobteacher + studytime + failures +
   summary()
 ```
 
-Of all possible interaction pairs, several were significant. Among those, the most "interpretable" are studytime:schoolsupyes, studytime:famsupyes, studytime:goout, and schoolsupyes:goout. Interestingly, it appears that the effects of studytime are reduced for high values of goout; this may suggest that going out increases fatigue or distractedness, leading to a decreased benefit from studying. 
+Of all possible interaction pairs, several were significant. Among those, the most "interpretable" are studytime:schoolsupyes, studytime:famsupyes, studytime:goout, and schoolsupyes:goout. Interestingly, it appears that the effects of studytime are reduced for high values of goout; this may suggest that going out increases fatigue or distractedness, leading to a decreased benefit from studying. We add these significant interactions to the Stepwise Model to create our fourth model as defined below: 
 
-$$y = \beta_0 + \beta_1SEXM + \beta_2AGE + \beta_3ADDRESSU + \beta_4MJOBHEALTH + \beta_5MJOBSERVICES + \beta_6FJOBTEACHER + \beta_7STUDYTIME + \beta_8FAILURES + \beta_9SCHOOLSUPYES + \beta_{10}FAMSUPYES + \beta_{11}GOOUT + \beta_{12}HEALTH + \beta_{13}ABSENCES + \beta_{14}studytime:schoolsupyes + \beta_{15}studytime:famsupyes + \beta_{16}studytime:goout + \beta_{17}schoolsupyes:goout + \epsilon$$
+$$y = \beta_0 + \beta_1SEXM + \beta_2AGE + \beta_3ADDRESSU + \beta_4MJOBHEALTH + \\ \beta_5MJOBSERVICES + \beta_6FJOBTEACHER + \beta_7STUDYTIME + \beta_8FAILURES + \\ \beta_9SCHOOLSUPYES + \beta_{10}FAMSUPYES + \beta_{11}GOOUT + \beta_{12}HEALTH + \\ \beta_{13}ABSENCES + \beta_{14}studytime:schoolsupyes + \beta_{15}studytime:famsupyes \\ + \beta_{16}studytime:goout + \beta_{17}schoolsupyes:goout + \epsilon$$
 
 ```{r}
 model.int <- lm(G3 ~ sexM + Mjobhealth + Mjobservices + Fjobteacher + studytime + 
@@ -486,9 +486,11 @@ p2 <- ggplot(data = dat_resid) + geom_point(aes(PRED, RESID)) + geom_hline(aes(y
 diagnostics4 <- cowplot::plot_grid(p1, p2)
 ```
 
-## Model 5: Reduced Stepwise Model
+### Model 5: Reduced Stepwise Model
 
-$$y = \beta_0 + \beta_4MJOBHEALTH + \beta_5MJOBSERVICES + \beta_6FJOBTEACHER + \beta_8FAILURES + \beta_9SCHOOLSUPYES + \beta_{11}GOOUT + \epsilon$$
+In order to build a more parsimonious model with less parameters, we took the approach of choosing a cut-off for the Type-III p-values from the added last tests of models 3 and 4 to determine which variables were most important in predicting final grade and were most useful to include in the model. For the fifth model, the Reduced Stepwise Model, we choose the six variables that had a type-III p-value of less than 0.0001 from the Stepwise Model 3. The model is outlined below:
+
+$$y = \beta_0 + \beta_4MJOBHEALTH + \beta_5MJOBSERVICES + \beta_6FJOBTEACHER + \\ \beta_8FAILURES + \beta_9SCHOOLSUPYES + \beta_{11}GOOUT + \epsilon$$
 
 ```{r}
 modelsmall <- lm(G3 ~ Mjobhealth + Mjobservices + Fjobteacher + failures + schoolsupyes + goout, data = student_d)
@@ -511,9 +513,11 @@ p2.small <- ggplot(data = dat_resid_small) + geom_point(aes(PRED, RESID)) + geom
 diagnostics5 <- cowplot::plot_grid(p1.small, p2.small)
 ```
 
-## Model 6: Reduced Interaction Model
+### Model 6: Reduced Interaction Model
 
-$$y = \beta_0 + \beta_1MJOBHEALTH + \beta_2MJOBSERVICES + \beta_3FJOBTEACHER + \beta_4STUDYTIME + \beta_5FAILURES + \beta_6SCHOOLSUPYES + \beta_7GOOUT + \beta_8HEALTH + \beta_9ABSENCES + \beta_10studytime:schoolsupyes + \beta_11studytime:goout + \epsilon$$
+For the fifth model, the Reduced Interaction Model, we choose the eleven variables that had a type-III p-value of less than 0.05 from the Interaction Model 4. If an interaction term was included, the base variables of that interaction term were also included, regardless of their significance. This model is outlined below:
+
+$$y = \beta_0 + \beta_1MJOBHEALTH + \beta_2MJOBSERVICES + \beta_3FJOBTEACHER + \\ \beta_4STUDYTIME + \beta_5FAILURES + \beta_6SCHOOLSUPYES + \beta_7GOOUT + \\ \beta_8HEALTH + \beta_9ABSENCES + \beta_10studytime:schoolsupyes + \\ \beta_11studytime:goout + \epsilon$$ 
 
 ```{r}
 smallint <- lm(G3 ~ Mjobhealth + Mjobservices + Fjobteacher + studytime + failures + schoolsupyes + absences + health + goout + studytime*schoolsupyes + studytime*goout, data = student_d)
