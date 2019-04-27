@@ -63,7 +63,7 @@ The potential outcomes of this analysis are:
 
 ## Data Description 
 
-There are 30 inital covariates in the dataset. They are listed below with their in depth descriptions in the Appendix.
+There are 30 inital covariates in the dataset. They are listed below and are described further in the Appendix.
 
 Covariates: School, Sex, Age, Address, Famsize, Pstatus, Medu, Fedu, Mjob, Fjob, Reason, Guardian, Traveltime, Studytime, Failures, Schoolsup, Famsup, Paid, Activities, Nursery, Higher, Internet, Romantic, Famrel, Freetime, Goout, Dalc, Walc, Health, Absences
 
@@ -350,9 +350,9 @@ Many of these are factor variables that have reference values in the itnercept, 
 
 ## Models and Model Testing
 
-There are many types of models to consider when building a regression classifier, such as Multiple Linear Regression, ANOVA, Linear Mixed Models, and Logistic/Poisson Regression. Classically, Linear Mixed Models are used when observations are related and Logistic/Poisson Regression are used for binrary outcomes. Since we are assuming our observations (the students) are independent for our purpose, and the outcome variable (final grade) is numeric, we narrow our model search down to Multiple Linear Regression and ANOVA. Since, at least to start, we have many factor-type covariates, we begin exploring Multiple Linear Regression models and their fit to our data.
+There are many types of models to consider when building a regression classifier, such as Multiple Linear Regression, ANOVA, Linear Mixed Models, and Logistic/Poisson Regression. Classically, Linear Mixed Models are used when observations are related and Logistic/Poisson Regression are used for binrary outcomes. Since we are assuming our observations (the students) are independent and the outcome variable (final grade) is numeric, we narrow our model search down to Multiple Linear Regression and ANOVA. Since, at the beginning, we have many factor-type covariates, we begin exploring Multiple Linear Regression models and their fit to our data.
 
-In order to determine the validity of all models, we must test the assumptions of linear regression. These include homogeneity of variances and gaussian errors. All assumptions are met in all models explored, and more detailed plots and tests for these assumptions can be seen in the appendix. 
+In order to determine the validity of all models, we must test the assumptions of linear regression. These include homogeneity of variances, linearity, and and gaussian errors. All assumptions are met in all models explored and more detailed plots and tests for these assumptions can be seen in the appendix.
 
 ### Model 1: Full Model 
 
@@ -422,11 +422,7 @@ modelforward <- step(model1, direction = "forward", trace = F)
 #modelforward 
 ```
 
-Backward and Both give the same variables.
-
-Forward gives all the variables.
-
-Both: 
+We then employed forward selection, backward selection, and combined forward and backward selection. Forward selection alone gives the full model, while backward selection and combined selection yield the same 13 covariates, excluding the intercept. We then adopted the result of backward selection as model 4.
 
 $$y = \beta_0 + \beta_1SEXM + \beta_2AGE + \beta_3ADDRESSU + \beta_4MJOBHEALTH + \beta_5MJOBSERVICES + \beta_6FJOBTEACHER + \beta_7STUDYTIME + \beta_8FAILURES + \beta_9SCHOOLSUPYES + \beta_{10}FAMSUPYES + \beta_{11}GOOUT + \beta_{12}HEALTH + \beta_{13}ABSENCES + \epsilon$$
 
@@ -452,7 +448,7 @@ p2 <- ggplot(data = dat_resid) + geom_point(aes(PRED, RESID)) + geom_hline(aes(y
 diagnostics3 <- cowplot::plot_grid(p1, p2)
 ```
 
-## Model 4: Interaction Model (model.int)
+## Model 4: Interaction Model
 
 ```{r, include = F}
 # looking at all possible interaction terms of variables chosen in modelback
@@ -462,7 +458,7 @@ lm(G3 ~(sexM + Mjobhealth + Mjobservices + Fjobteacher + studytime + failures +
   summary()
 ```
 
-Of all possible interaction terms, several were significant. Among those, the most "interpretable" are studytime:schoolsupyes, studytime:famsupyes, studytime:goout, and schoolsupyes:goout. Interestingly, it appears that the effects of studytime are reduced when one goes out a lot; perhaps fatigue reduces the effectiveness of studying. 
+Of all possible interaction pairs, several were significant. Among those, the most "interpretable" are studytime:schoolsupyes, studytime:famsupyes, studytime:goout, and schoolsupyes:goout. Interestingly, it appears that the effects of studytime are reduced for high values of goout; this may suggest that going out increases fatigue or distractedness, leading to a decreased benefit from studying. 
 
 $$y = \beta_0 + \beta_1SEXM + \beta_2AGE + \beta_3ADDRESSU + \beta_4MJOBHEALTH + \beta_5MJOBSERVICES + \beta_6FJOBTEACHER + \beta_7STUDYTIME + \beta_8FAILURES + \beta_9SCHOOLSUPYES + \beta_{10}FAMSUPYES + \beta_{11}GOOUT + \beta_{12}HEALTH + \beta_{13}ABSENCES + \beta_{14}studytime:schoolsupyes + \beta_{15}studytime:famsupyes + \beta_{16}studytime:goout + \beta_{17}schoolsupyes:goout + \epsilon$$
 
