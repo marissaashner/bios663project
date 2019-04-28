@@ -77,8 +77,6 @@ For this analysis, we will be considering the `G3` final grade as our response. 
 
 ## Expoloratory Data Analysis and Variable Filtering
 
-Write a paragraph about how it went here. Refer to plots in appendix. Maybe pick one or two plots to go here depending on room.
-
 ```{r}
 ### Distribution of the Response Variable 
 outcomeplot1 <- student %>% 
@@ -136,6 +134,8 @@ allvars <- student %>%
   geom_boxplot()
 ```
 
+We additionally had to perform some scaling of predictors in order to avoid problems of collinearity with these variables and the intercept. The first of these variables was the absences variable. While most of our variables were factors or numeric variables with small ranges, the absence variable ranged from 0 to 93 and was very skewed right. We decided to bin the absence variable into a 5 level numeric variable where 1 is absences less than 5, 2 is absences between 5 and 10, and so on, until 5 is replaced for absences greater than 20. The distribution before and after this variable transformation is shown in the plots below.
+
 ```{r}
 ## visualizing absences
 abs1 <- student %>%
@@ -149,8 +149,6 @@ abs2 <- ggplot(student, aes(absences, G3)) +
   geom_smooth() +
   labs(title = "Final Grade by Absences", x = "Number of school absences", y = "Final grade")
 ```
-
-Since the variable "absences" has a greater range of values than most of the other variables, and since after 22 absences the data becomes extremely sparse, we decided to group 23-93 absences within the value "23."
 
 ```{r}
 ## Pooling all absences greater than 22 into the 23 group
@@ -170,8 +168,6 @@ abs4 <- ggplot(student, aes(absences, G3)) +
   geom_jitter() +
   geom_smooth()
 ```
-
-"Absences" still has a much greater spread of values than the other variables, so we will try binning them to see how that effects our models. 
 
 ```{r}
 ## Binning absences into 5 groups with 5 absence numbers each (except for the last group that includes all absences greater than or equal to 20).
@@ -222,6 +218,9 @@ abs7 <- student %>%
 cowplot::plot_grid(abs2, abs7)
 ```
 
+The second variable we transformed was the age variable. We subtracted each age from the minimum age so the range was change from 15-22 to 0-7.
+
+
 ```{r}
 ## visualizing alcohol consumption
 
@@ -270,7 +269,7 @@ guardianRDA <- student %>%
   geom_jitter(width = 0.2, alpha = 0.5)
 ```
 
-Based on the exploratory data an analysis plots, we decided to remove the variable "guardian" from our dataset since it didn't seem to have any influence on the outcome. 
+Based on some exploratory data an analysis plots, which can be seen in the Appendix, we decided to remove the variable "guardian" from our dataset since it didn't seem to have any influence on the outcome. 
 We also observed that students in this dataset were from two different schools. Using school in our prediction of math course success, although it may increase prediction accuracy, would make our analysis less generalizable to the overall population of students. Since the overarching goal of this analysis is to identify factors that systematically affect secondary school student success in math courses, we decided to remove school as a predictor variable.
 
 ```{r}
@@ -328,14 +327,18 @@ PCs_corr <- prcomp(R)[2]
 df <- data.frame("Eigenvalue" = c(eig_corr), "Condition Index" = c(CI_corr))
 df2 <- data.frame("Eigenvalue" = c(eig_sscp), "Condition Index" = c(CI_sscp))
 
-df %>% tail(2) %>% knitr::kable(align = c("c", "c"))
-df2 %>% filter(`Condition.Index` > 30) %>% knitr::kable(align = c("c", "c"))
+#df %>% tail(2) %>% knitr::kable(align = c("c", "c"))
+#df2 %>% filter(`Condition.Index` > 30) %>% knitr::kable(align = c("c", "c"))
 ```
 
-From the Correlation Matrix, the highest Condition Index is still very small, which means no collinearity needs to be taken care of there. From the Scaled SSCP Matrix, there are two Condition Indices over 30.
+From the Correlation Matrix, the highest Condition Index is still very small, which means no collinearity needs to be taken care of there. From the Scaled SSCP Matrix, there is one Condition Index over 30.
 
-```{r}
-PCs_sscp$rotation[1:17,36:37]
+```{r, echo=FALSE, fig.align="center", out.width=700}
+knitr::include_graphics("eigenanalysis .png")
+```
+
+```{r, include = FALSE}
+PCs_sscp$rotation[1:17,36:37] %>% t()
 ```
 
 Above shows the last 2 PC's of the Scaled SSCP Matrix for the 1st-17th covariates (the rest have values close to 0). We can see that the 8th and 11-17th covariates may be collinear with the intercept. These covariates are listed below.
@@ -423,7 +426,7 @@ modelback <- step(model1, direction = "backward", trace = F)
 #modelback
 
 modelboth <- step(model1, direction = "both", trace = F)
-modelboth
+#modelboth
 
 modelforward <- step(model1, direction = "forward", trace = F)
 #modelforward 
