@@ -334,7 +334,7 @@ df2 <- data.frame("Eigenvalue" = c(eig_sscp), "Condition Index" = c(CI_sscp))
 From the Correlation Matrix, the highest Condition Index is still very small, which means no collinearity needs to be taken care of there. From the Scaled SSCP Matrix, there is one Condition Index over 30.
 
 ```{r, echo=FALSE, fig.align="center", out.width=700}
-knitr::include_graphics("eigenanalysis .png")
+knitr::include_graphics("eigenanalysis.png")
 ```
 
 ```{r, include = FALSE}
@@ -637,13 +637,19 @@ The power of these models relies on their utility in the classroom. If teachers 
 
 ### Exploratory Data Analysis 
 
+**Figure 1:** Below we show to correlation plots between the numerical covariates. On the left, we show that the period 1 and period 2 grades are highly correlated with the final grade, which is why we remove those as in the plot on the right. 
+
 ```{r, fig.height = 3, fig.width = 6}
 cowplot::plot_grid(corrplot1, corrplot2)
 ```
 
+**Figure 2:** Final grade distributions before and after we drop the 0's for analysis.
+
 ```{r, fig.height = 3, fig.width = 6}
 cowplot::plot_grid(outcomeplot1, outcomeplot2)
 ```
+
+**Figure 3:** Exploratory Data Analysis plots for a select few covariates.
 
 ```{r, fig.height = 6, fig.width = 9}
 cowplot::plot_grid(wdalcoholRDA, wealcoholRDA, travelRDA, studyingRDA, guardianRDA, nrow = 2)
@@ -651,10 +657,14 @@ cowplot::plot_grid(wdalcoholRDA, wealcoholRDA, travelRDA, studyingRDA, guardianR
 
 ### Model Diagnostics 
 
+**Figure 4:** Anderson-Darling test for normailty results for each  model. 
+
 ```{r}
 nortests <- data.frame(model = c(1:6), "Anderson-Darling p-value" = c(nortest1$p.value, nortest2$p.value, nortest3$p.value, nortest4$p.value, nortest5$p.value, nortest6$p.value))
 nortests %>% knitr::kable(align = c("c", "c"))
 ```
+
+**Figure 5:** Residual analysis for each model.
 
 ```{r, fig.height = 18, fig.width = 6}
 cowplot::plot_grid(diagnostics1, diagnostics2, diagnostics3, diagnostics4, diagnostics5, diagnostics6, nrow = 6)
