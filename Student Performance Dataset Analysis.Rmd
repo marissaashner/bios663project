@@ -58,8 +58,8 @@ In this analysis, we wish to predict student success in secondary school math as
 
 The potential outcomes of this analysis are:
 
-1. Identification of student behaviors that can be targeted through school-related programs or interventions in order to increase success
 1. Indentification of inherent factors present in certain students' backgrounds that may put them at a disadvantage to begin with. Early identification without discrimination could result in these students being helped more effectively along the way.
+2. Identification of student behaviors that can be targeted through school-related programs or interventions in order to increase success
 
 ## Data Description 
 
@@ -410,7 +410,7 @@ model2 <- lm(G3 ~ . -1, data = student_d)
 #summary(model2)
 ```
 
-It should be noted that the adjusted $R^2$ value for this model is `r summary(model2)$adj.r.sq`. Although this model is nested in the full model, the adjusted $R^2$ is much larger than that of the full model, which is not expected. This is misleading, as models without an intercept should not necessarily be used to model data, even if they appear to explain more of the variation between your observations. This will be explored more in the model comparison section. 
+It should be noted that the adjusted $R^2$ value for this model is `r summary(model2)$adj.r.sq`. Although this model is nested in the full model, the adjusted $R^2$ is much larger than that of the full model, which is not expected. This is misleading, as models without an intercept should not necessarily be used to model data, even if they appear to explain more of the variation between your observations.
 
 ```{r}
 stud_resid = rstudent(model2)
@@ -451,7 +451,7 @@ $$y = \beta_0 + \beta_1SEXM + \beta_2AGE + \beta_3ADDRESSU + \beta_4MJOBHEALTH +
 summary(modelback)$coefficients
 ```
 
-It should be noted that the adjusted $R^2$ value for this model is `r summary(modelback)$adj.r.sq`. 
+Adjusted $R^2$ value for this model is `r summary(modelback)$adj.r.sq`. 
 
 ```{r}
 stud_resid = rstudent(modelback)
@@ -492,7 +492,7 @@ model.int <- lm(G3 ~ sexM + Mjobhealth + Mjobservices + Fjobteacher + studytime 
 summary(model.int)$coefficients 
 ```
 
-It should be noted that the adjusted $R^2$ value for this model is `r summary(model.int)$adj.r.sq`. 
+Adjusted $R^2$ value for this model is `r summary(model.int)$adj.r.sq`. 
 
 ```{r}
 stud_resid = rstudent(model.int)
@@ -524,7 +524,7 @@ modelsmall <- lm(G3 ~ Mjobhealth + Mjobservices + Fjobteacher + failures + schoo
 summary(modelsmall)$coefficients
 ```
 
-It should be noted that the adjusted $R^2$ value for this model is `r summary(modelsmall)$adj.r.sq`. 
+Adjusted $R^2$ value for this model is `r summary(modelsmall)$adj.r.sq`. 
 
 ```{r}
 stud_resid_small = rstudent(modelsmall)
@@ -554,7 +554,7 @@ smallint <- lm(G3 ~ Mjobhealth + Mjobservices + Fjobteacher + studytime + failur
 summary(smallint)$coefficients
 ```
 
-It should be noted that the adjusted $R^2$ value for this model is `r summary(smallint)$adj.r.sq`. 
+Adjusted $R^2$ value for this model is `r summary(smallint)$adj.r.sq`. 
 
 ```{r}
 stud_resid = rstudent(smallint)
@@ -582,11 +582,11 @@ model6_all <- lm(G3 ~ Mjobhealth + Mjobservices + Fjobteacher + studytime + fail
 summary(model6_all)$coefficients
 ```
 
-It should be noted that the adjusted $R^2$ value for this model is `r summary(model6_all)$adj.r.sq`. 
+Adjusted $R^2$ value for this model is `r summary(model6_all)$adj.r.sq`. 
 
 ## Model Selection and Interpretation
 
-Aside from looking at the Adjusted $R^2$ to judge performance of a model, we can look at the AIC or SBC/BIC as well. We compare all of the models we built below, using all three of the performance measures listed above, as well as the number of parameters in the model. 
+Aside from looking at the Adjusted $R^2$ to judge performance of a model, we can look at the AIC and SBC/BIC as well. We compare all of the models we built below, listing all three performance measures and the number of parameters in the model. 
 
 ```{r}
 library(tidyverse)
@@ -603,7 +603,7 @@ selection %>% knitr::kable(align = c("c", "c"))
 ## Conclusion
 Ultimately, we would select either our reduced step-wise model (Model 5) or our reduced interaction model (Model 6) because both of these models were able to explain a similar amount of variation and almost identical fits based on BIC. The main decision would lie in whether the investigator values a more parsimonious model (Model 5) or one with interaction terms (Model 6).
 
-Regardless of the model, we were able able to find both static and modifiable variables that significantly impacted a student's final grade across several of our models. Certain parental career choices had a positive impact on final math grades; specifically, students with a mother in the health or service fields and fathers in in education tended to perform better. This suggests that a parent's interests and/or work habits can have a positive influence on a student's academics. A static factor that negatively effected final grades was number of previous failures. This might be expected as, intuitively, students that have made poor grades in the past would be more likely than other students to perform poorly in the future.  
+Regardless of the model, we were able able to find both static and modifiable variables that significantly impacted a student's final grade across several of our models. Certain parental career choices had a positive impact on final math grades; specifically, students with a mother in the health or service fields and fathers in education tended to perform better. This suggests that a parent's interests and/or work habits can have a positive influence on a student's academics. A static factor that negatively effected final grades was number of previous failures. This might be expected as, intuitively, students that have made poor grades in the past would be more likely than other students to perform poorly in the future.  
 
 The modifiable factors that significantly impacted overall grade were time spent studying, time going out and number of absences. Intuitively, these would certainly impact a student's academic performance. We also found these variables to effect final grade in an explainable direction. Increased time studying was associated with higher grades, while more time out with friends and a greater number of abscenses negatively impacted final grades. 
 
