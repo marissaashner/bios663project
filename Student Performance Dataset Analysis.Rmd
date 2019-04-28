@@ -91,7 +91,7 @@ outcomeplot1 <- student %>%
 student %>% select(G1, G2, G3) %>% filter(G3 ==0 & G1 ==0 & G2 ==0)
 ```
 
-Let's remove the students with a grade of 0, as that doesn't make much practical sense, especially since all of these students have grades higher than 0 first and/or second period.
+We looked at the distribution of the outcome variable, final grade, and noticed that the distribution was fairly normal except for a number of 0's. Looking further, all of these students had positive grades for the first and second periods, so it didn't seem to make practical sense that their final grades were zero. Since we were not given more information on what these zeros meant, whether it was for students moving, dropping out, or are missing values, we decided to drop the values from the data for our purposes.
 
 ```{r}
 #**BB: agree with this approach, if we are feeling adventurous we could treat those 0's as missing and impute them but let's not over complicate things yet
@@ -270,8 +270,7 @@ guardianRDA <- student %>%
   geom_jitter(width = 0.2, alpha = 0.5)
 ```
 
-Based on these plots, we decided to remove the variable "guardian" from our dataset since it didn't seem to have any influence on the outcome. 
-
+Based on the exploratory data an analysis plots, we decided to remove the variable "guardian" from our dataset since it didn't seem to have any influence on the outcome. 
 We also observed that students in this dataset were from two different schools. Using school in our prediction of math course success, although it may increase prediction accuracy, would make our analysis less generalizable to the overall population of students. Since the overarching goal of this analysis is to identify factors that systematically affect secondary school student success in math courses, we decided to remove school as a predictor variable.
 
 ```{r}
@@ -387,7 +386,7 @@ diagnostics1 <- cowplot::plot_grid(p1, p2)
 
 ### Model 2: No Intercept
 
-Since, from the collinearity analysis, several variables were significantly colinear with the intercept, we next try to build a model identical to the full model with the removal of the intercept. The model can be written as follows: 
+Since, from the collinearity analysis, several variables were significantly colinear with the intercept, we next try to build a model identical to the full model with the removal of the intercept to see how that affects the results of the model. It can be written as follows: 
 
 $$y = \beta_1X_1 + ... + \beta_{36}X_{36} + \epsilon$$
 
@@ -396,7 +395,7 @@ model2 <- lm(G3 ~ . -1, data = student_d)
 #summary(model2)
 ```
 
-It should be noted that the adjusted $R^2$ value for this model is `r summary(model2)$adj.r.sq`. 
+It should be noted that the adjusted $R^2$ value for this model is `r summary(model2)$adj.r.sq`. Although this model is nested in the full model, the adjusted $R^2$ is much larger than that of the full model, which is not expected. This is misleading, as models without an intercept should not necessarily be used to model data, even if they appear to explain more of the variation between your observations. This will be explored more in the model comparison section. 
 
 ```{r}
 stud_resid = rstudent(model2)
@@ -556,14 +555,18 @@ diagnostics6 <- cowplot::plot_grid(p1, p2)
 
 ### Model 6 All Subjects: Sensitivity analysis for dropping all subjects with G3 = 0
 
+
+
 ```{r}
 model6_all <- lm(G3 ~ Mjobhealth + Mjobservices + Fjobteacher + studytime + failures + schoolsupyes + absences + health + goout + studytime*schoolsupyes + studytime*goout, data = student_d_all)
-summary(model6_all)
+summary(model6_all)$coefficients
 ```
+
+It should be noted that the adjusted $R^2$ value for this model is `r summary(model6_all)$adj.r.sq`. 
 
 ## Model Selection and Interpretation
 
-Aside from looking at the Adjusted R2, can look at the AIC or SBC/BIC (smaller is better in both cases)
+Aside from looking at the Adjusted $R^2$ to judge performance of a model, we can look at the AIC or SBC/BIC as well. We compare all of the models we built below, using all three of the performance measures listed above, as well as the number of parameters in the model. 
 
 ```{r}
 library(tidyverse)
