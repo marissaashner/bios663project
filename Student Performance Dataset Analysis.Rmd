@@ -298,7 +298,7 @@ student_all <- student_all %>%
 ### Collinearity Analysis 
 
 Before running any models on our data, we want to check some computational diagnostics to see whether or not the covariates are collinear with each other or the intercept. To do that, we can first calculate the VIF and Tolerance values for each covariate. 
-The covariates with the highest VIF values are shown below. Usually, ****
+The covariates with the highest VIF values are shown below.
 
 ```{r}
 covariates_int <- model.matrix(G3 ~ ., data = student )
