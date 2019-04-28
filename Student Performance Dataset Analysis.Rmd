@@ -398,7 +398,7 @@ model2 <- lm(G3 ~ . -1, data = student_d)
 #summary(model2)
 ```
 
-It should be noted that the adjusted $R^2$ value for this model is `r summary(model2)$adj.r.sq`. Although this model is nested in the full model, the adjusted $R^2$ is much larger than that of the full model, which is not expected. This is misleading, as models without an intercept should not necessarily be used to model data, even if they appear to explain more of the variation between your observations. This will be explored more in the model comparison section. 
+It should be noted that the adjusted $R^2$ value for this model is `r summary(model2)$adj.r.sq`. Although this model is nested in the full model, the adjusted $R^2$ is much larger than that of the full model, which is not expected. This is misleading, as models without an intercept should not necessarily be used to model data, even if they appear to explain more of the variation between your observations.
 
 ```{r}
 stud_resid = rstudent(model2)
@@ -438,7 +438,7 @@ $$y = \beta_0 + \beta_1SEXM + \beta_2AGE + \beta_3ADDRESSU + \beta_4MJOBHEALTH +
 summary(modelback)$coefficients
 ```
 
-It should be noted that the adjusted $R^2$ value for this model is `r summary(modelback)$adj.r.sq`. 
+Adjusted $R^2$ value for this model is `r summary(modelback)$adj.r.sq`. 
 
 ```{r}
 stud_resid = rstudent(modelback)
@@ -478,7 +478,7 @@ model.int <- lm(G3 ~ sexM + Mjobhealth + Mjobservices + Fjobteacher + studytime 
 summary(model.int)$coefficients 
 ```
 
-It should be noted that the adjusted $R^2$ value for this model is `r summary(model.int)$adj.r.sq`. 
+Adjusted $R^2$ value for this model is `r summary(model.int)$adj.r.sq`. 
 
 ```{r}
 stud_resid = rstudent(model.int)
@@ -509,7 +509,7 @@ modelsmall <- lm(G3 ~ Mjobhealth + Mjobservices + Fjobteacher + failures + schoo
 summary(modelsmall)$coefficients
 ```
 
-It should be noted that the adjusted $R^2$ value for this model is `r summary(modelsmall)$adj.r.sq`. 
+Adjusted $R^2$ value for this model is `r summary(modelsmall)$adj.r.sq`. 
 
 ```{r}
 stud_resid_small = rstudent(modelsmall)
@@ -538,7 +538,7 @@ smallint <- lm(G3 ~ Mjobhealth + Mjobservices + Fjobteacher + studytime + failur
 summary(smallint)$coefficients
 ```
 
-It should be noted that the adjusted $R^2$ value for this model is `r summary(smallint)$adj.r.sq`. 
+Adjusted $R^2$ value for this model is `r summary(smallint)$adj.r.sq`. 
 
 ```{r}
 stud_resid = rstudent(smallint)
@@ -565,11 +565,11 @@ model6_all <- lm(G3 ~ Mjobhealth + Mjobservices + Fjobteacher + studytime + fail
 summary(model6_all)$coefficients
 ```
 
-It should be noted that the adjusted $R^2$ value for this model is `r summary(model6_all)$adj.r.sq`. 
+Adjusted $R^2$ value for this model is `r summary(model6_all)$adj.r.sq`. 
 
 ## Model Selection and Interpretation
 
-Aside from looking at the Adjusted $R^2$ to judge performance of a model, we can look at the AIC or SBC/BIC as well. We compare all of the models we built below, using all three of the performance measures listed above, as well as the number of parameters in the model. 
+Aside from looking at the Adjusted $R^2$ to judge performance of a model, we can look at the AIC and SBC/BIC as well. We compare all of the models we built below, listing all three performance measures and the number of parameters in the model. 
 
 ```{r}
 library(tidyverse)
