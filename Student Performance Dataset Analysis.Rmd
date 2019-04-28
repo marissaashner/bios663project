@@ -228,8 +228,11 @@ The second variable we transformed was the age variable. We subtracted each age 
 wealcoholRDA <- student %>% 
   mutate(Walc = factor(Walc)) %>% 
   ggplot(aes(Walc, G3)) +
-  geom_violin() +
-  geom_jitter(width = 0.2, alpha = 0.5)
+  geom_violin(color = "gray") +
+  geom_jitter(width = 0.2, alpha = 0.5) + 
+  labs(title = "Weekend Alcohol Consumption", x = "Level of weekend alcohol consumption", y = "Final grade") +
+  scale_fill_brewer(palette="Pastel2") +
+  theme(legend.position="none")
 
 
 # workday alcohol consumption (5 is highest)
@@ -238,7 +241,7 @@ wdalcoholRDA <- student %>%
   ggplot(aes(Dalc, G3, fill = Dalc)) +
   geom_violin(color = "gray") +
   geom_jitter(width = 0.2, alpha = 0.5) +
-  labs(title = "Final Grade by Workday Alcohol Consumption", x = "Level of workday alcohol consumption (5 is very high)", y = "Final grade") +
+  labs(title = "Workday Alcohol Consumption", x = "Level of workday alcohol consumption", y = "Final grade") +
   scale_fill_brewer(palette="Pastel2") +
   theme(legend.position="none")
 
@@ -248,7 +251,7 @@ studyingRDA <- student %>%
   ggplot(aes(studytime, G3, fill = studytime)) +
   geom_violin(color = "gray") +
   geom_jitter(width = 0.2, alpha = 0.5) +
-  labs(title = "Final Grade by Time Spent Studying", x = "Weekly Study Time", y = "Final grade") +
+  labs(title = "Time Spent Studying", x = "Weekly Study Time", y = "Final grade") +
   scale_fill_brewer(palette="Pastel2") +
   theme(legend.position="none") +
   scale_x_discrete(labels=c("<2 hours", "2-5 hours", "5-10 hours", ">10 hours"))
@@ -258,15 +261,23 @@ studyingRDA <- student %>%
 travelRDA <- student %>% 
   mutate(traveltime = factor(traveltime)) %>% 
   ggplot(aes(traveltime, G3)) +
-  geom_violin() +
-  geom_jitter(width = 0.2, alpha = 0.5)
+  geom_violin(color = "gray") +
+  geom_jitter(width = 0.2, alpha = 0.5) + 
+  labs(title = "Home to School Travel Time", x = "Time in minutes", y = "Final grade") +
+  scale_fill_brewer(palette="Pastel2") +
+  theme(legend.position="none") +
+  scale_x_discrete(labels=c("< 15", "15-30", "30-60", "> 60"))
 
 ## Guardian
 guardianRDA <- student %>% 
   mutate(guardian = factor(guardian)) %>% 
   ggplot(aes(guardian, G3)) +
-  geom_violin() +
-  geom_jitter(width = 0.2, alpha = 0.5)
+  geom_violin(color = "gray") +
+  geom_jitter(width = 0.2, alpha = 0.5) + 
+  labs(title = "Student's Guardian", x = "Guardian", y = "Final grade") +
+  scale_fill_brewer(palette="Pastel2") +
+  theme(legend.position="none") +
+  scale_x_discrete(labels=c("mother", "father", "other"))
 ```
 
 Based on some exploratory data an analysis plots, which can be seen in the Appendix, we decided to remove the variable "guardian" from our dataset since it didn't seem to have any influence on the outcome. 
@@ -385,6 +396,7 @@ nortest1 <- nortest::ad.test(dat_resid$RESID)
 p1 <- ggplot(data = dat_resid) + geom_histogram(aes(RESID), bins = 25) + labs(x = "Studentized Residuals")
 p2 <- ggplot(data = dat_resid) + geom_point(aes(PRED, RESID)) + geom_hline(aes(yintercept = 0)) + labs(x = "Predicted Values", y = "Studentized Residuals")
 diagnostics1 <- cowplot::plot_grid(p1, p2)
+#diagnostics1 <- cowplot::plot_grid("Model 1", diagnostics1)
 ```
 
 ### Model 2: No Intercept
@@ -414,6 +426,7 @@ nortest2 <- nortest::ad.test(dat_resid$RESID)
 p1 <- ggplot(data = dat_resid) + geom_histogram(aes(RESID), bins = 25) + labs(x = "Studentized Residuals")
 p2 <- ggplot(data = dat_resid) + geom_point(aes(PRED, RESID)) + geom_hline(aes(yintercept = 0)) + labs(x = "Predicted Values", y = "Studentized Residuals")
 diagnostics2 <- cowplot::plot_grid(p1, p2)
+#diagnostics2 <- cowplot::plot_grid("Model 2", diagnostics2)
 ```
 
 ### Model 3: Stepwise Model
@@ -454,6 +467,7 @@ nortest3 <- nortest::ad.test(dat_resid$RESID)
 p1 <- ggplot(data = dat_resid) + geom_histogram(aes(RESID), bins = 25) + labs(x = "Studentized Residuals")
 p2 <- ggplot(data = dat_resid) + geom_point(aes(PRED, RESID)) + geom_hline(aes(yintercept = 0)) + labs(x = "Predicted Values", y = "Studentized Residuals")
 diagnostics3 <- cowplot::plot_grid(p1, p2)
+#diagnostics3 <- cowplot::plot_grid("Model 3", diagnostics3)
 ```
 
 ### Model 4: Interaction Model
@@ -494,6 +508,7 @@ nortest4 <- nortest::ad.test(dat_resid$RESID)
 p1 <- ggplot(data = dat_resid) + geom_histogram(aes(RESID), bins = 25) + labs(x = "Studentized Residuals")
 p2 <- ggplot(data = dat_resid) + geom_point(aes(PRED, RESID)) + geom_hline(aes(yintercept = 0)) + labs(x = "Predicted Values", y = "Studentized Residuals")
 diagnostics4 <- cowplot::plot_grid(p1, p2)
+#diagnostics4 <- cowplot::plot_grid("Model 4", diagnostics4)
 ```
 
 ### Model 5: Reduced Stepwise Model
@@ -525,6 +540,7 @@ nortest5 <- nortest::ad.test(dat_resid_small$RESID)
 p1.small <- ggplot(data = dat_resid_small) + geom_histogram(aes(RESID), bins = 25) + labs(x = "Studentized Residuals")
 p2.small <- ggplot(data = dat_resid_small) + geom_point(aes(PRED, RESID)) + geom_hline(aes(yintercept = 0)) + labs(x = "Predicted Values", y = "Studentized Residuals")
 diagnostics5 <- cowplot::plot_grid(p1.small, p2.small)
+#diagnostics5 <- cowplot::plot_grid("Model 5", diagnostics5)
 ```
 
 ### Model 6: Reduced Interaction Model
@@ -554,6 +570,7 @@ nortest6 <- nortest::ad.test(dat_resid$RESID)
 p1 <- ggplot(data = dat_resid) + geom_histogram(aes(RESID), bins = 25) + labs(x = "Studentized Residuals")
 p2 <- ggplot(data = dat_resid) + geom_point(aes(PRED, RESID)) + geom_hline(aes(yintercept = 0)) + labs(x = "Predicted Values", y = "Studentized Residuals")
 diagnostics6 <- cowplot::plot_grid(p1, p2)
+#diagnostics6 <- cowplot::plot_grid("Model 6", diagnostics6)
 ```
 
 ### Model 6 All Subjects: Sensitivity analysis for dropping all subjects with G3 = 0
