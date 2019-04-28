@@ -604,6 +604,8 @@ The power of these models relies on their utility in the classroom. If teachers 
 
 ### Covariate Description 
 
+Seen below are descriptions for each of the 30 independent variables used in the full model.
+
 1. SCHOOL - student's school (binary: "GP" - Gabriel Pereira or "MS" - Mousinho da Silveira)
 2. SEX - student's sex (binary: "F" - female or "M" - male)
 3. AGE - student's age (numeric: from 15 to 22)
@@ -656,6 +658,8 @@ cowplot::plot_grid(wdalcoholRDA, wealcoholRDA, travelRDA, studyingRDA, guardianR
 ```
 
 ### Model Diagnostics 
+
+Based on the Anderson-Darling p-values and residual plots shown below, it appears that all 6 of the models discussed satisfy the assumptions of homogeneity (residual scatterplot), linearity (residual scatterplot), and Gaussian errors (p-value and residual histogram).
 
 **Figure 4:** Anderson-Darling test for normailty results for each  model. 
 
