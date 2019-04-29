@@ -45,7 +45,7 @@ student_all <- as_tibble(student)
 
 ## Introduction
 
-Portugal, in 2006, had an early school leaving rate of nearly 40% for 18-24 year olds, while the EU average was 15% (Eurostat 2007). Various analyses and interventions, therefore, have targeted school success in Portuguese adolescents and attempted to improve education overall. Portuguese students are lacking in mathematics performance, specifically.
+Portugal, in 2006, had an early school leaving rate of nearly 40% for 18-24 year olds, while the EU average was 15% (Eurostat 2007). Various analyses and interventions, therefore, have targeted school success in Portuguese adolescents and have attempted to improve overall education. Portuguese students are lacking in mathematics performance, specifically, compared to students in surrounding countries.
 
 We are therefore analyzing student data from two Portuguese secondary schools. This dataset measures mathematics course grade as the outcome, as a result of 30 predictors that range from demographic factors and family situation to student habits and extracurricular involvement. Specifically, data was collected from 395 students across an age range of 15-22 years (Cortez & Silva 2008).
 
@@ -65,9 +65,9 @@ The potential outcomes of this analysis are:
 
 There are 30 inital covariates in the dataset. They are listed below and are described further in the Appendix.
 
-Covariates: School, Sex, Age, Address, Famsize, Pstatus, Medu, Fedu, Mjob, Fjob, Reason, Guardian, Traveltime, Studytime, Failures, Schoolsup, Famsup, Paid, Activities, Nursery, Higher, Internet, Romantic, Famrel, Freetime, Goout, Dalc, Walc, Health, Absences
+* Covariates: School, Sex, Age, Address, Famsize, Pstatus, Medu, Fedu, Mjob, Fjob, Reason, Guardian, Traveltime, Studytime, Failures, Schoolsup, Famsup, Paid, Activities, Nursery, Higher, Internet, Romantic, Famrel, Freetime, Goout, Dalc, Walc, Health, Absences
 
-Response Variables: G1 (first period grade), G2 (second period grade), and G3 (final grade)
+* Response Variables: G1 (first period grade), G2 (second period grade), and G3 (final grade)
 
 All the responses are numeric variables that range from 0 to 20. For this analysis, we will be considering the `G3` final grade as the output target. The reason for this is that all three response variables are very highly correlated, which can be seen visually in Figure 1 of the Appendix.
 
@@ -85,7 +85,7 @@ outcomeplot1 <- student %>%
 student %>% select(G1, G2, G3) %>% filter(G3 ==0 & G1 ==0 & G2 ==0)
 ```
 
-We looked at the distribution of the outcome variable, final grade, and noticed that the distribution was fairly normal except for a number of 0's (see Figure 2 in the Appendix). Looking further, all of these students had positive grades for the first and second periods, so it didn't seem to make practical sense that their final grades were zero. Since we were not given more information on what these zeros meant, whether it was for students moving, dropping out, or are missing values, we decided to drop the values from the data for our purposes.
+We looked at the distribution of the outcome variable, final grade, and noticed that the distribution was fairly normal except for a large number of 0's (see Figure 2 in the Appendix). Looking further, all of these students had positive grades for the first and second periods, so it didn't seem to make practical sense that their final grades were zero. Since we were not given more information on what these zeros meant, whether it was for students moving, dropping out, or missing values, we decided to drop the values from the data for our purposes.
 
 ```{r}
 #**BB: agree with this approach, if we are feeling adventurous we could treat those 0's as missing and impute them but let's not over complicate things yet
@@ -130,7 +130,7 @@ allvars <- student %>%
   geom_boxplot()
 ```
 
-We additionally had to perform some scaling of predictors in order to avoid problems of collinearity with these variables and the intercept. The first of these variables was the absences variable. While most of our variables were factors or numeric variables with small ranges, the absence variable ranged from 0 to 93 and was very skewed right. We decided to bin the absence variable into a 5 level numeric variable where 1 is absences less than 5, 2 is absences between 5 and 10, and so on, until 5 is replaced for absences greater than 20. The distribution before and after this variable transformation is shown in the plots below.
+We additionally had to perform some scaling of predictors in order to avoid problems of collinearity with these variables and the intercept. The first of these variables was the `absences` variable. While most of our variables were factors or numeric variables with small ranges, `absence` ranged from 0 to 93 and was very skewed right. We decided to bin the absence variable into a 5-level numeric variable where 1 is absences less than 5, 2 is absences between 5 and 10, and so on for 3 and 4, with 5 corresponding to absences greater than 20. The distribution before and after this variable transformation is shown in the plots below.
 
 ```{r}
 ## visualizing absences
@@ -214,7 +214,7 @@ abs7 <- student %>%
 cowplot::plot_grid(abs2, abs7)
 ```
 
-The second variable we transformed was the age variable. We subtracted each age from the minimum age so the range was change from 15-22 to 0-7.
+The second variable we transformed was the `age` variable. We subtracted each age from the minimum age so the range was changed from 15-22 to 0-7.
 
 
 ```{r}
@@ -229,7 +229,6 @@ wealcoholRDA <- student %>%
   labs(title = "Weekend Alcohol Consumption", x = "Level of weekend alcohol consumption", y = "Final grade") +
   scale_fill_brewer(palette="Pastel2") +
   theme(legend.position="none")
-
 
 # workday alcohol consumption (5 is highest)
 wdalcoholRDA <- student %>% 
@@ -251,7 +250,6 @@ studyingRDA <- student %>%
   scale_fill_brewer(palette="Pastel2") +
   theme(legend.position="none") +
   scale_x_discrete(labels=c("<2 hours", "2-5 hours", "5-10 hours", ">10 hours"))
-
 
 ## Time spent travelling
 travelRDA <- student %>% 
@@ -276,7 +274,7 @@ guardianRDA <- student %>%
   scale_x_discrete(labels=c("mother", "father", "other"))
 ```
 
-Based on some exploratory data an analysis plots (see Figure 3 in the Appendix) we decided to remove the variable "guardian" from our dataset since it didn't seem to have any influence on the outcome. We also observed that students in this dataset were from two different schools. Using school in our prediction of math course success, although it may increase prediction accuracy, would make our analysis less generalizable to the overall population of students. Since the overarching goal of this analysis is to identify factors that systematically affect secondary school student success in math courses, we decided to remove school as a predictor variable.
+Based on some exploratory data an analysis plots (see Figure 3 in the Appendix), we decided to remove the variable `guardian` from our dataset since it didn't seem to have any influence on the outcome. We also observed that students in this dataset were from two different schools. Using `school` in our prediction of math course success, although it may increase prediction accuracy, would make our analysis less generalizable to the overall population of students. Since the overarching goal of this analysis is to identify factors that systematically affect secondary school student success in math courses, we decided to remove `school` as a predictor variable.
 
 ```{r}
 student$age <- student$age - min(student$age)
@@ -292,8 +290,7 @@ student_all <- student_all %>%
 
 ### Collinearity Analysis 
 
-Before running any models on our data, we want to check some computational diagnostics to see whether or not the covariates are collinear with each other or the intercept. To do that, we can first calculate the VIF and Tolerance values for each covariate. 
-The covariates with the highest VIF values are shown below.
+Before running any models on our data, we want to check some computational diagnostics to see whether or not the covariates are collinear with each other or the intercept. To do that, we can first calculate the VIF and Tolerance values for each covariate. The covariates with the highest VIF values are shown below.
 
 ```{r}
 covariates_int <- model.matrix(G3 ~ ., data = student )
@@ -304,7 +301,6 @@ VIF = car::vif(model1)
 Tol = 1/VIF
 df = data.frame(Variable = names(VIF), VIF = VIF, Tolerance = Tol)
 viftol <- df %>% arrange(desc(VIF)) %>% head(10) %>% knitr::kable(align = c("c", "c"))
-
 
 #set up dataframe for all students dataset:
 covariates_int_all <- model.matrix(G3 ~ ., data = student_all )
@@ -353,7 +349,7 @@ Above shows the last 2 PC's of the Scaled SSCP Matrix for the 1st-17th covariate
 colnames(student_d)[c(7, 9:16)]
 ```
 
-After transforming the absences and age variables as described in the previous section, the only variables that remain collinear with the intercept are factor variables. Since we coded our design matrix using reference cell coding, the collinearity of these variables with the intercept is somewhat expected since they have reference values in the intercept. Therefore we decided not to remove any variables from our full model.
+After transforming `absences` and `age` as described in the previous section, the only variables that remain collinear with the intercept are factor variables. Since we coded our design matrix using reference cell coding, the collinearity of these variables with the intercept is somewhat expected since they have reference values in the intercept. Therefore we decided not to remove any variables from our full model.
 
 ### HILE Gauss Assumptions 
 
