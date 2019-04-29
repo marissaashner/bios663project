@@ -67,13 +67,9 @@ There are 30 inital covariates in the dataset. They are listed below and are des
 
 Covariates: School, Sex, Age, Address, Famsize, Pstatus, Medu, Fedu, Mjob, Fjob, Reason, Guardian, Traveltime, Studytime, Failures, Schoolsup, Famsup, Paid, Activities, Nursery, Higher, Internet, Romantic, Famrel, Freetime, Goout, Dalc, Walc, Health, Absences
 
-The response variables are: 
+Response Variables: G1 (first period grade), G2 (second period grade), and G3 (final grade)
 
-1. G1 - first period grade (numeric: from 0 to 20) 
-2. G2 - second period grade (numeric: from 0 to 20) 
-3. G3 - final grade (numeric: from 0 to 20, output target)
-
-For this analysis, we will be considering the `G3` final grade as our response. The reason for this is that all three response variables are very highly correlated, which can be seen visually in the Appendix.
+All the responses are numeric variables that range from 0 to 20. For this analysis, we will be considering the `G3` final grade as the output target. The reason for this is that all three response variables are very highly correlated, which can be seen visually in Figure 1 of the Appendix.
 
 ## Expoloratory Data Analysis and Variable Filtering
 
@@ -82,14 +78,14 @@ For this analysis, we will be considering the `G3` final grade as our response. 
 outcomeplot1 <- student %>% 
   ggplot(aes(G3)) + geom_histogram(binwidth = 1, color='black', fill = 'grey') + 
   geom_vline(xintercept = mean(student$G3), lwd = 1, color = 'red') +
-  labs(title = "Distribution of Final Math Grade", x="Final Grade", y="Count")
+  labs(title = "Distribution of Final Grade", x="Final Math Grade", y="Count")
 ```
 
 ```{r, include = FALSE }
 student %>% select(G1, G2, G3) %>% filter(G3 ==0 & G1 ==0 & G2 ==0)
 ```
 
-We looked at the distribution of the outcome variable, final grade, and noticed that the distribution was fairly normal except for a number of 0's. Looking further, all of these students had positive grades for the first and second periods, so it didn't seem to make practical sense that their final grades were zero. Since we were not given more information on what these zeros meant, whether it was for students moving, dropping out, or are missing values, we decided to drop the values from the data for our purposes.
+We looked at the distribution of the outcome variable, final grade, and noticed that the distribution was fairly normal except for a number of 0's (see Figure 2 in the Appendix). Looking further, all of these students had positive grades for the first and second periods, so it didn't seem to make practical sense that their final grades were zero. Since we were not given more information on what these zeros meant, whether it was for students moving, dropping out, or are missing values, we decided to drop the values from the data for our purposes.
 
 ```{r}
 #**BB: agree with this approach, if we are feeling adventurous we could treat those 0's as missing and impute them but let's not over complicate things yet
@@ -117,7 +113,7 @@ student_all <- student_all %>% select(-G1, -G2)
 outcomeplot2 <- student %>% 
   ggplot(aes(G3)) + geom_histogram(binwidth = 1, color='black', fill = 'grey') + 
   geom_vline(xintercept = mean(student$G3), lwd = 1, color = 'red') +
-  labs(title = "Distribution of Final Math Grade", x="Final Grade", y="Count")
+  labs(title = "Distribution of Final Grade", x="Final Math Grade", y="Count")
 ```
 
 ```{r}
@@ -280,8 +276,7 @@ guardianRDA <- student %>%
   scale_x_discrete(labels=c("mother", "father", "other"))
 ```
 
-Based on some exploratory data an analysis plots, which can be seen in the Appendix, we decided to remove the variable "guardian" from our dataset since it didn't seem to have any influence on the outcome. 
-We also observed that students in this dataset were from two different schools. Using school in our prediction of math course success, although it may increase prediction accuracy, would make our analysis less generalizable to the overall population of students. Since the overarching goal of this analysis is to identify factors that systematically affect secondary school student success in math courses, we decided to remove school as a predictor variable.
+Based on some exploratory data an analysis plots (see Figure 3 in the Appendix) we decided to remove the variable "guardian" from our dataset since it didn't seem to have any influence on the outcome. We also observed that students in this dataset were from two different schools. Using school in our prediction of math course success, although it may increase prediction accuracy, would make our analysis less generalizable to the overall population of students. Since the overarching goal of this analysis is to identify factors that systematically affect secondary school student success in math courses, we decided to remove school as a predictor variable.
 
 ```{r}
 student$age <- student$age - min(student$age)
@@ -352,17 +347,17 @@ knitr::include_graphics("eigenanalysis.png")
 PCs_sscp$rotation[1:17,36:37] %>% t()
 ```
 
-Above shows the last 2 PC's of the Scaled SSCP Matrix for the 1st-17th covariates (the rest have values close to 0). We can see that the 8th and 11-17th covariates may be collinear with the intercept. These covariates are listed below.
+Above shows the last 2 PC's of the Scaled SSCP Matrix for the 1st-17th covariates (the rest have values close to 0). We can see that the 7th and 9-16th covariates may be collinear with the intercept. These covariates are listed below.
 
 ```{r}
-colnames(student_d)[c(7, 10:16)]
+colnames(student_d)[c(7, 9:16)]
 ```
 
-Many of these are factor variables that have reference values in the itnercept, so it makes sense they might be collinear. Therefore we decided not to remove any variables from our full model for collinearity issues.
+After transforming the absences and age variables as described in the previous section, the only variables that remain collinear with the intercept are factor variables. Since we coded our design matrix using reference cell coding, the collinearity of these variables with the intercept is somewhat expected since they have reference values in the intercept. Therefore we decided not to remove any variables from our full model.
 
 ### HILE Gauss Assumptions 
 
-The homogeneity of variances, linearity, and gaussian errors asssumptions usually go hand in hand, and can be tested for each model using a residual analysis. For each model we run, we conduct an Anderson-Darling Test for Normality, and create residual plots. For all models in this report, all three of these diagnostics were met. The detailed tests and plots are in the Appendix. In terms of the existence assumption, we assume it holds since we have a finite sample. We also must assume the independence of observations assumption holds for our analysis, although we do not have enough information to fully support this claim. We are not given information on the students such as whether or not there are siblings or related students in the group, whether or not certain study groups were relevant, whether or not the classes were curved, or other qualities of the data that could result in a violation of this assumption. Therefore we move forward claiming all assumptions are satisified. 
+The homogeneity of variances, linearity, and gaussian errors asssumptions usually go hand in hand, and can be tested for each model using a residual analysis. For each model we run, we conduct an Anderson-Darling Test for Normality (see Figure 4 in the Appendix), and create residual plots (see Figure 5 in the Appendix). For all models in this report, all three of these diagnostics were met. In terms of the existence assumption, we assume it holds since we have a finite sample. We also must assume the independence of observations assumption holds for our analysis, although we do not have enough information to fully support this claim. We are not given information on the students such as whether or not there are siblings or related students in the group, whether or not certain study groups were relevant, whether or not the classes were curved, or other qualities of the data that could result in a violation of this assumption. Therefore we move forward claiming all assumptions are satisified. 
 
 ## Models and Model Testing
 
@@ -431,7 +426,7 @@ diagnostics2 <- cowplot::plot_grid(p1, p2)
 
 ### Model 3: Stepwise Model
 
-We then employed forward selection, backward selection, and combined forward and backward selection. Forward selection alone gives the full model, while backward selection and combined selection yield the same 13 covariates, excluding the intercept. We then adopted the result of backward selection as model 3.
+We then employed forward selection, backward selection, and combined forward and backward selection using the `step` function in R, which selects a model based on AIC. Forward selection alone gives the full model, while backward selection and combined selection yield the same 13 covariates. We adopted the result of backward selection as our third model. The covariates chosen are as follows:
 
 ```{r}
 set.seed(12345)
@@ -480,7 +475,7 @@ lm(G3 ~(sexM + Mjobhealth + Mjobservices + Fjobteacher + studytime + failures +
   summary()
 ```
 
-Of all possible interaction pairs, several were significant. Among those, the most "interpretable" are studytime:schoolsupyes, studytime:famsupyes, studytime:goout, and schoolsupyes:goout. Interestingly, it appears that the effects of studytime are reduced for high values of goout; this may suggest that going out increases fatigue or distractedness, leading to a decreased benefit from studying. We add these significant interactions to the Stepwise Model to create our fourth model as defined below: 
+We next wanted to include some interaction terms between the covariates in our model. Of all possible interaction pairs, several were significant but only a few were interpretable. These are studytime:schoolsupyes, studytime:famsupyes, studytime:goout, and schoolsupyes:goout. We add these significant interactions to the Stepwise Model to create our fourth model as defined below: 
 
 $$y = \beta_0 + \beta_1SEXM + \beta_2AGE + \beta_3ADDRESSU + \beta_4MJOBHEALTH +  \beta_5MJOBSERVICES + \beta_6FJOBTEACHER + \beta_7STUDYTIME + \beta_8FAILURES + \\ \beta_9SCHOOLSUPYES + \beta_{10}FAMSUPYES + \beta_{11}GOOUT + \beta_{12}HEALTH +  \beta_{13}ABSENCES + \beta_{14}STUDYTIME*SCHOOLSUPYES + \beta_{15}STUDYTIME*FAMSUPYES \\ + \beta_{16}STUDYTIME*GOOUT + \beta_{17}SCHOOLSUPYES*GOOUT + \epsilon$$
 
@@ -492,7 +487,7 @@ model.int <- lm(G3 ~ sexM + Mjobhealth + Mjobservices + Fjobteacher + studytime 
 summary(model.int)$coefficients 
 ```
 
-Adjusted $R^2$ value for this model is `r summary(model.int)$adj.r.sq`. 
+Adjusted $R^2$ value for this model is `r summary(model.int)$adj.r.sq`. Interestingly, it appears that the effects of studytime are reduced for high values of goout; this may suggest that going out increases fatigue or distractedness, leading to a decreased benefit from studying. 
 
 ```{r}
 stud_resid = rstudent(model.int)
@@ -575,14 +570,14 @@ diagnostics6 <- cowplot::plot_grid(p1, p2)
 
 ### Model 6 All Subjects: Sensitivity analysis for dropping all subjects with G3 = 0
 
-
+Since removing the final grades of 0 from our analyses resulted in only using about 90% of our data, we wanted to run a sensitivity analysis on the 6th model to see how keeping the 0's changes the result. 
 
 ```{r}
 model6_all <- lm(G3 ~ Mjobhealth + Mjobservices + Fjobteacher + studytime + failures + schoolsupyes + absences + health + goout + studytime*schoolsupyes + studytime*goout, data = student_d_all)
 summary(model6_all)$coefficients
 ```
 
-Adjusted $R^2$ value for this model is `r summary(model6_all)$adj.r.sq`. 
+Adjusted $R^2$ value for this model is `r summary(model6_all)$adj.r.sq`. Here, when all data is used, the intercept, MJobhealth, MJobservies, failures, and studytime:schoolsupyes all have significant Type III p-values at the 0.05 level. In the model where we dropped the 0's (Model 6), Fjobteacher, studytime, absences, health, and studytime:goout are additionally significant at that same level. This give us some insight that removing the 0's does affect the significance of the covariates in our models. 
 
 ## Model Selection and Interpretation
 
@@ -685,10 +680,10 @@ nortests <- data.frame(model = c(1:6), "Anderson-Darling p-value" = c(nortest1$p
 nortests %>% knitr::kable(align = c("c", "c"))
 ```
 
-**Figure 5:** Residual analysis for each model.
+**Figure 5:** Residual analysis for each model (A-F correspond to models 1-6 respectively).
 
-```{r, fig.height = 18, fig.width = 6}
-cowplot::plot_grid(diagnostics1, diagnostics2, diagnostics3, diagnostics4, diagnostics5, diagnostics6, nrow = 6)
+```{r, fig.height = 9, fig.width = 12}
+cowplot::plot_grid(diagnostics1, diagnostics2, diagnostics3, diagnostics4, diagnostics5, diagnostics6, nrow = 3, labels = "AUTO")
 ```
 
 
