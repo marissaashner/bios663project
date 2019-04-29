@@ -210,7 +210,7 @@ abs7 <- student %>%
 
 ```
 
-```{r, fig.height = 3, fig.width = 6}
+```{r, fig.height = 2.5, fig.width = 5}
 cowplot::plot_grid(abs2, abs7)
 ```
 
@@ -339,7 +339,7 @@ df2 <- data.frame("Eigenvalue" = c(eig_sscp), "Condition Index" = c(CI_sscp))
 
 From the Correlation Matrix, the highest Condition Index is still very small, which means no collinearity needs to be taken care of there. From the Scaled SSCP Matrix, there is one Condition Index over 30.
 
-```{r, echo=FALSE, fig.align="center", out.width=700}
+```{r, echo=FALSE, fig.align="center", out.width=600}
 knitr::include_graphics("eigenanalysis.png")
 ```
 
