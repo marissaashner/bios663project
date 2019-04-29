@@ -357,7 +357,7 @@ The homogeneity of variances, linearity, and gaussian errors asssumptions usuall
 
 ## Models and Model Testing
 
-There are many types of models to consider when building a regression classifier, such as Multiple Linear Regression, ANOVA, Linear Mixed Models, and Logistic/Poisson Regression. Classically, Linear Mixed Models are used when observations are related and Logistic/Poisson Regression are used for binrary outcomes. Since we are assuming our observations (the students) are independent and the outcome variable (final grade) is numeric, we narrow our model search down to Multiple Linear Regression and ANOVA. Since, at the beginning, we have many factor-type covariates, we begin exploring Multiple Linear Regression models and their fit to our data.
+There are many types of models to consider when building a regression classifier, such as Multiple Linear Regression, ANOVA, Linear Mixed Models, and Logistic/Poisson Regression. Classically, Linear Mixed Models are used when observations are related and Logistic/Poisson Regression are used for binary outcomes. Since we are assuming our observations (the students) are independent and the outcome variable (final grade) is numeric, we narrow our model search down to Multiple Linear Regression and ANOVA. Since, at the beginning, we have many factor-type covariates, we begin exploring Multiple Linear Regression models and their fit to our data.
 
 ### Model 1: Full Model 
 
@@ -392,7 +392,7 @@ diagnostics1 <- cowplot::plot_grid(p1, p2)
 
 ### Model 2: No Intercept
 
-Since, from the collinearity analysis, several variables were significantly colinear with the intercept, we next try to build a model identical to the full model with the removal of the intercept to see how that affects the results of the model. It can be written as follows: 
+Since, from the collinearity analysis, several variables were significantly collinear with the intercept, we next try to build a model identical to the full model with the removal of the intercept to see how that affects the results of the model. It can be written as follows:
 
 $$y = \beta_1X_1 + ... + \beta_{36}X_{36} + \epsilon$$
 
@@ -442,7 +442,7 @@ $$y = \beta_0 + \beta_1SEXM + \beta_2AGE + \beta_3ADDRESSU + \beta_4MJOBHEALTH +
 summary(modelback)$coefficients
 ```
 
-Adjusted $R^2$ value for this model is `r summary(modelback)$adj.r.sq`. 
+The adjusted $R^2$ value for this model is `r summary(modelback)$adj.r.sq`. 
 
 ```{r}
 stud_resid = rstudent(modelback)
@@ -483,7 +483,7 @@ model.int <- lm(G3 ~ sexM + Mjobhealth + Mjobservices + Fjobteacher + studytime 
 summary(model.int)$coefficients 
 ```
 
-Adjusted $R^2$ value for this model is `r summary(model.int)$adj.r.sq`. Interestingly, it appears that the effects of studytime are reduced for high values of goout; this may suggest that going out increases fatigue or distractedness, leading to a decreased benefit from studying. 
+The adjusted $R^2$ value for this model is `r summary(model.int)$adj.r.sq`. Interestingly, it appears that the effects of `studytime` are reduced for high values of `goout`; this may suggest that going out increases fatigue or distractedness, leading to a decreased benefit from studying.
 
 ```{r}
 stud_resid = rstudent(model.int)
@@ -504,7 +504,7 @@ diagnostics4 <- cowplot::plot_grid(p1, p2)
 
 ### Model 5: Reduced Stepwise Model
 
-In order to build a more parsimonious model with less parameters, we took the approach of choosing a cut-off for the Type-III p-values from the added last tests of models 3 and 4 to determine which variables were most important in predicting final grade and were most useful to include in the model. For the fifth model, the Reduced Stepwise Model, we choose the six variables that had a type-III p-value of less than 0.0001 from the Stepwise Model 3. The model is outlined below:
+In order to build a more parsimonious model with fewer parameters, we took the approach of choosing a cut-off for the Type-III p-values from the added-last tests of models 3 and 4 to determine which variables were most important in predicting final grade and were most useful to include in the model. For the fifth model, the Reduced Stepwise Model, we choose the six variables that had a type-III p-value of less than 0.0001 from the Stepwise Model 3. The model is outlined below:
 
 $$y = \beta_0 + \beta_1MJOBHEALTH + \beta_2MJOBSERVICES + \beta_3FJOBTEACHER + \beta_4FAILURES + \beta_5SCHOOLSUPYES + \beta_6GOOUT + \epsilon$$
 
@@ -515,7 +515,7 @@ modelsmall <- lm(G3 ~ Mjobhealth + Mjobservices + Fjobteacher + failures + schoo
 summary(modelsmall)$coefficients
 ```
 
-Adjusted $R^2$ value for this model is `r summary(modelsmall)$adj.r.sq`. 
+The adjusted $R^2$ value for this model is `r summary(modelsmall)$adj.r.sq`. 
 
 ```{r}
 stud_resid_small = rstudent(modelsmall)
@@ -536,7 +536,7 @@ diagnostics5 <- cowplot::plot_grid(p1.small, p2.small)
 
 ### Model 6: Reduced Interaction Model
 
-For the fifth model, the Reduced Interaction Model, we choose the eleven variables that had a type-III p-value of less than 0.05 from the Interaction Model 4. If an interaction term was included, the base variables of that interaction term were also included, regardless of their significance. This model is outlined below:
+For the fifth model, the Reduced Interaction Model, we chose the eleven variables that had a type-III p-value of less than 0.05 from the Interaction Model 4. If an interaction term was included, the base variables of that interaction term were also included, regardless of their significance. This model is outlined below:
 
 $$y = \beta_0 + \beta_1MJOBHEALTH + \beta_2MJOBSERVICES + \beta_3FJOBTEACHER +  \beta_4STUDYTIME + \beta_5FAILURES + \beta_6SCHOOLSUPYES + \beta_7GOOUT + \\ \beta_8HEALTH + \beta_9ABSENCES + \beta_{10}STUDYTIME*SCHOOLSUPYES +  \beta_{11}STUDYTIME*GOOUT + \epsilon$$ 
 
@@ -545,7 +545,7 @@ smallint <- lm(G3 ~ Mjobhealth + Mjobservices + Fjobteacher + studytime + failur
 summary(smallint)$coefficients
 ```
 
-Adjusted $R^2$ value for this model is `r summary(smallint)$adj.r.sq`. 
+The adjusted $R^2$ value for this model is `r summary(smallint)$adj.r.sq`. 
 
 ```{r}
 stud_resid = rstudent(smallint)
@@ -592,6 +592,7 @@ selection %>% knitr::kable(align = c("c", "c"))
 ```
 
 ## Conclusion
+
 Ultimately, we would select either our reduced step-wise model (Model 5) or our reduced interaction model (Model 6) because both of these models were able to explain a similar amount of variation and almost identical fits based on BIC. The main decision would lie in whether the investigator values a more parsimonious model (Model 5) or one with interaction terms (Model 6).
 
 Regardless of the model, we were able able to find both static and modifiable variables that significantly impacted a student's final grade across several of our models. Certain parental career choices had a positive impact on final math grades; specifically, students with a mother in the health or service fields and fathers in education tended to perform better. This suggests that a parent's interests and/or work habits can have a positive influence on a student's academics. A static factor that negatively effected final grades was number of previous failures. This might be expected as, intuitively, students that have made poor grades in the past would be more likely than other students to perform poorly in the future.  
@@ -600,7 +601,7 @@ The modifiable factors that significantly impacted overall grade were time spent
 
 We would like to extend this dataset to span multiple years for future research. A longitudinal dataset with information on student dropout throughout secondary school would allow us to evaluate which factors significantly impact the dropout rate. This is seemingly the more important question for Portugal, based on the presentation of the dataset. 
 
-The power of these models relies on their utility in the classroom. If teachers are able to gather and model student data like this early in a school year, then the teachers will be able to best help students achieve a more desireable grade. More attention can be given to student's with negatively influential static factors. Student's can also be motiviated to change modifiable behavior early in the year to make an overall positive impact on their grade.
+The power of these models relies on their utility in the classroom. If teachers are able to gather and model student data like this early in a school year, they will be able to best help students achieve a more desireable grade. More attention can be given to students with negatively-influential static factors. Students can also be motiviated to change modifiable behaviors early in the year to make an overall positive impact on their grade.
 
 ## References 
 
